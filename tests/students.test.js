@@ -21,7 +21,7 @@ beforeEach(async () => {
   )
 })
 
-test('students are returned as json', async () => {
+test('all students are returned as json', async () => {
   await api
     .get('/students')
     .expect(200)

@@ -30,5 +30,4 @@ app.use('/students', studentsRouter)
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 
-// Export the app
 module.exports = app
