@@ -7,7 +7,10 @@ const sequelize = new Sequelize(
   config.MYSQL_INFO.user,
   config.MYSQL_INFO.password, {
     host: config.MYSQL_INFO.host,
-    dialect: 'mysql'
+    dialect: 'mysql',
+    define: {
+      underscored: true
+    }
   })
 
 module.exports = { sequelize }
