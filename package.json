@@ -4,11 +4,11 @@
   "description": "Backend of Footwork: a dance video management system for dance schools and association.",
   "main": "index.js",
   "scripts": {
-   "start": "cross-env NODE_ENV=production node index.js",
-   "dev": "cross-env NODE_ENV=development nodemon index.js",
-   "test": "cross-env NODE_ENV=test node --test",
-   "lint": "eslint ."
-},
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "test": "cross-env NODE_ENV=test node --test",
+    "lint": "eslint ."
+  },
   "author": "",
   "license": "MIT",
   "dependencies": {
@@ -20,6 +20,7 @@
     "express-async-errors": "^3.1.1",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "mysql2": "^3.11.3",
     "static": "^2.0.0"
   },
   "devDependencies": {
