@@ -39,14 +39,13 @@ erDiagram
     CHOREOGRAPHY {
         BIG_INT id PK
         STRING title
-        STRING tag
         BIG_INT course_id FK
     }
 
     VIDEO {
         BIG_INT id PK
-        BLOB cover_image_data
-        BLOB video_data
+        STRING cover_image_url
+        STRING video_url
         STRING title
         TIMESTAMP created_at
         TIMESTAMP updated_at
