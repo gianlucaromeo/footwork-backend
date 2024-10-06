@@ -6,70 +6,15 @@ const supertest = require('supertest')
 const api = supertest(app)
 
 const { sequelize } = require('../db/db')
-const Student = require('../models/student')
-const Admin = require('../models/admin')
 const Course = require('../models/course')
 const helper = require('./tests_helper')
 
-let adminToken = null
 
-let firstStudentLoggedIn = null
+let firstAdminLoggedIn = null
 
 beforeEach(async () => {
-  await Admin.destroy({ where: {} })
-
-  await Promise.all(
-    helper.initialAdmins.map(admin =>
-      api.post('/admins')
-        .send(admin)
-        .expect(201)
-        .expect('Content-Type', /application\/json/)
-    )
-  )
-
-  await Student.destroy({ where: {} })
-
-  await Promise.all(
-    helper.initialStudents.map(student =>
-      api.post('/students')
-        .send(student)
-        .expect(201)
-    )
-  )
-
-  const adminLoginResponse = await api
-    .post('/login/admin')
-    .send({
-      email: helper.initialAdmins[0].email,
-      password: helper.initialAdmins[0].password
-    })
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
-
-  adminToken = adminLoginResponse.body.token
-
-  const firstStudentLoggedInRepsonse = await api
-    .post('/login/student')
-    .send({
-      email: helper.initialStudents[0].email,
-      password: helper.initialStudents[0].password
-    })
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
-
-  firstStudentLoggedIn = firstStudentLoggedInRepsonse.body
-
-  await Course.destroy({ where: {} })
-
-  await Promise.all(
-    helper.initialCourses.map(course =>
-      api.post('/courses')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send(course)
-        .expect(201)
-        .expect('Content-Type', /application\/json/)
-    )
-  )
+  const users = await helper.initizliaseDatabase()
+  firstAdminLoggedIn = users.firstAdminLoggedIn
 })
 
 after(() => {
@@ -84,7 +29,7 @@ describe('When there are initially some courses saved', async () => {
 
     await api
       .post('/courses')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
       .send(newCourse)
       .expect(201)
       .expect('Content-Type', /application\/json/)

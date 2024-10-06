@@ -7,56 +7,15 @@ const api = supertest(app)
 
 const { sequelize } = require('../db/db')
 const Student = require('../models/student')
-const Admin = require('../models/admin')
 const helper = require('./tests_helper')
 
-let adminToken = null
-
+let firstAdminLoggedIn = null
 let firstStudentLoggedIn = null
 
 beforeEach(async () => {
-  await Admin.destroy({ where: {} })
-
-  await Promise.all(
-    helper.initialAdmins.map(admin =>
-      api.post('/admins')
-        .send(admin)
-        .expect(201)
-        .expect('Content-Type', /application\/json/)
-    )
-  )
-
-  await Student.destroy({ where: {} })
-
-  await Promise.all(
-    helper.initialStudents.map(student =>
-      api.post('/students')
-        .send(student)
-        .expect(201)
-    )
-  )
-
-  const adminLoginResponse = await api
-    .post('/login/admin')
-    .send({
-      email: helper.initialAdmins[0].email,
-      password: helper.initialAdmins[0].password
-    })
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
-
-  adminToken = adminLoginResponse.body.token
-
-  const firstStudentLoggedInRepsonse = await api
-    .post('/login/student')
-    .send({
-      email: helper.initialStudents[0].email,
-      password: helper.initialStudents[0].password
-    })
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
-
-  firstStudentLoggedIn = firstStudentLoggedInRepsonse.body
+  const users = await helper.initizliaseDatabase()
+  firstAdminLoggedIn = users.firstAdminLoggedIn
+  firstStudentLoggedIn = users.firstStudentLoggedIn
 })
 
 after(() => {
@@ -86,7 +45,7 @@ describe('When there are initially some students saved', async () => {
   test('all students are returned as json to an admin', async () => {
     await api
       .get('/students')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 

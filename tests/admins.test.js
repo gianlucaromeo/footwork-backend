@@ -12,27 +12,8 @@ const helper = require('./tests_helper')
 let firstAdminLoggedIn = null
 
 beforeEach(async () => {
-  await Admin.destroy({ where: {} })
-
-  await Promise.all(
-    helper.initialAdmins.map(admin =>
-      api.post('/admins')
-        .send(admin)
-        .expect(201)
-        .expect('Content-Type', /application\/json/)
-    )
-  )
-
-  const adminLoginResponse = await api
-    .post('/login/admin')
-    .send({
-      email: helper.initialAdmins[0].email,
-      password: helper.initialAdmins[0].password
-    })
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
-
-  firstAdminLoggedIn = adminLoginResponse.body
+  const users = await helper.initizliaseDatabase()
+  firstAdminLoggedIn = users.firstAdminLoggedIn
 })
 
 after(() => {
