@@ -43,14 +43,19 @@ const initizliaseDatabase = async () => {
   const Course = require('../models/course')
   const Enrollment = require('../models/enrollment')
 
+  await Enrollment.destroy({ where: {} })
+  await Admin.destroy({ where: {} })
+  await Student.destroy({ where: {} })
+  await Course.destroy({ where: {} })
+
   const app = require('../app')
   const supertest = require('supertest')
   const api = supertest(app)
 
   let firstAdminLoggedIn = null
   let firstStudentLoggedIn = null
+  let firstCourse = null
 
-  await Admin.destroy({ where: {} })
 
   await Promise.all(
     initialAdmins.map(admin =>
@@ -61,7 +66,6 @@ const initizliaseDatabase = async () => {
     )
   )
 
-  await Student.destroy({ where: {} })
 
   await Promise.all(
     initialStudents.map(student =>
@@ -93,7 +97,6 @@ const initizliaseDatabase = async () => {
 
   firstStudentLoggedIn = firstStudentLoggedInRepsonse.body
 
-  await Course.destroy({ where: {} })
 
   await Promise.all(
     initialCourses.map(course =>
@@ -105,9 +108,30 @@ const initizliaseDatabase = async () => {
     )
   )
 
-  // TODO Add enrollments
+  const firstCourseResponse = await api
+    .get('/courses').
+    set('Authorization', `Bearer ${firstAdminLoggedIn.token}`).
+    expect(200).
+    expect('Content-Type', /application\/json/)
 
-  return { firstAdminLoggedIn, firstStudentLoggedIn }
+  firstCourse = firstCourseResponse.body[0]
+
+
+  const enrollment = {
+    studentId: firstStudentLoggedIn.id,
+    courseId: firstCourse.id
+  }
+
+  await api
+    .post('/enrollments')
+    .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+    .send(enrollment)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const initialEnrollments = [enrollment]
+
+  return { firstAdminLoggedIn, firstStudentLoggedIn, firstCourse, initialEnrollments }
 }
 
 module.exports = {
