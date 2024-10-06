@@ -1,13 +1,20 @@
 const jwt = require('jsonwebtoken')
-const bycrypt = require('bcrypt')
+const bcrypt = require('bcrypt')
 const loginRouter = require('express').Router()
 const Student = require('../models/student')
+const Admin = require('../models/admin')
 const { isEmail } = require('validator')
 
+function createToken(payload) {
+  return jwt.sign(
+    payload,
+    process.env.SECRET,
+    { expiresIn: 48 * 60 * 60 }  // 48 hours
+  )
+}
 
-// TODO Add a route to handle login requests for admins
-
-loginRouter.post('/student', async (request, response) => {
+// General login handler
+async function loginUser(roleModel, request, response) {
   const { email, password } = request.body
 
   if (!email || !password) {
@@ -20,33 +27,40 @@ loginRouter.post('/student', async (request, response) => {
     })
   }
 
-  const student = await Student.findOne({ email })
+  const user = await roleModel.findOne({
+    where: { email }
+  })
 
-  const passwordCorrect = student === null
+  const passwordCorrect = user === null
     ? false
-    : await bycrypt.compare(password, student.passwordHash)
+    : await bcrypt.compare(password, user.passwordHash)
 
-  if (!(student && passwordCorrect)) {
+  if (!(user && passwordCorrect)) {
     return response.status(401).json({
       error: 'Invalid email or password'
     })
   }
 
   const payload = {
-    email: student.email,
-    id: student._id
+    email: user.email,
+    id: user._id
   }
 
-  // Token expires in 48*60*60 seconds, that is, in 48 hours
-  const token = jwt.sign(
-    payload,
-    process.env.SECRET,
-    { expiresIn: 48*60*60 }
-  )
+  const token = createToken(payload)
 
   response
     .status(200)
-    .send({ token, email: student.email, name: student.name })
+    .send({ token, email: user.email, name: user.name })
+}
+
+// Admin login
+loginRouter.post('/admin', (request, response) => {
+  loginUser(Admin, request, response)
+})
+
+// Student login
+loginRouter.post('/student', (request, response) => {
+  loginUser(Student, request, response)
 })
 
 module.exports = loginRouter

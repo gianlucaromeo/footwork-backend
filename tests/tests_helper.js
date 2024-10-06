@@ -1,18 +1,34 @@
 const initialStudents = [
   {
-    'firstName': 'First Name 1',
+    'firstName': 'Student 1',
     'lastName': 'Last Name 1',
-    'email': 'first1@last1.com',
+    'email': 'student1@1.com',
     'password': 'Password1'
   },
   {
-    'firstName': 'First Name 2',
+    'firstName': 'Student 2',
     'lastName': 'Last Name 2',
-    'email': 'first2@last2.com',
+    'email': 'student2@2.com',
+    'password': 'Password2'
+  }
+]
+
+const initialAdmins = [
+  {
+    'firstName': 'Admin 1',
+    'lastName': 'Last Name 1',
+    'email': 'admin1@1.com',
+    'password': 'Password1'
+  },
+  {
+    'firstName': 'Admin 2',
+    'lastName': 'Last Name 2',
+    'email': 'admin2@2.com',
     'password': 'Password2'
   }
 ]
 
 module.exports = {
-  initialStudents
+  initialStudents,
+  initialAdmins
 }

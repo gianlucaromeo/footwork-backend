@@ -6,16 +6,16 @@ const supertest = require('supertest')
 const api = supertest(app)
 
 const { sequelize } = require('../db/db')
-const Student = require('../models/student')
+const Admin = require('../models/admin')
 const helper = require('./tests_helper')
 
 beforeEach(async () => {
-  await Student.destroy({ where: {} })
+  await Admin.destroy({ where: {} })
 
   await Promise.all(
-    helper.initialStudents.map(student =>
-      api.post('/students')
-        .send(student)
+    helper.initialAdmins.map(admin =>
+      api.post('/admins')
+        .send(admin)
         .expect(201)
     )
   )
@@ -25,34 +25,34 @@ after(() => {
   sequelize.close()
 })
 
-describe('When there are initially some students saved', async () => {
-  test('a valid student can login', async () => {
-    const student = helper.initialStudents[0]
+describe('When there are initially some admins saved', async () => {
+  test('a valid admin can login', async () => {
+    const admin = helper.initialAdmins[0]
 
     const loginData = {
-      email: student.email,
-      password: student.password
+      email: admin.email,
+      password: admin.password
     }
 
     const response = await api
-      .post('/login/student')
+      .post('/login/admin')
       .send(loginData)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    assert.strictEqual(response.body.email, student.email)
-    assert.strictEqual(response.body.name, student.name)
+    assert.strictEqual(response.body.email, admin.email)
+    assert.strictEqual(response.body.name, admin.name)
     assert(response.body.token)
   })
 
-  test('all students are returned as json', async () => {
+  test('all admins are returned as json', async () => {
     // TODO Only admins should be able to access this endpoint
     await api
-      .get('/students')
+      .get('/admins')
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    const students = await Student.findAll()
-    assert.strictEqual(students.length, helper.initialStudents.length)
+    const admins = await Admin.findAll()
+    assert.strictEqual(admins.length, helper.initialAdmins.length)
   })
 })
