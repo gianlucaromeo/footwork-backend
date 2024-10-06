@@ -8,13 +8,13 @@ const studentsRouter = require('./controllers/students')
 const loginRouter = require('./controllers/login')
 const adminsRouter = require('./controllers/admins')
 
-// Middleware setup
+// First middlewares setup
 app.use(cors())
 app.use(express.static('dist'))
 app.use(express.json())
 app.use(middleware.requestLogger)
 
-// Connect to MySQL
+// MySQL connection
 sequelize.authenticate()
   .then(() => {
     sequelize.sync()
@@ -26,11 +26,12 @@ sequelize.authenticate()
     console.error('Unable to connect to MySQL:', err)
   })
 
-// TODO add routers here
+// Routers setup
 app.use('/students', studentsRouter)
 app.use('/admins', adminsRouter)
 app.use('/login', loginRouter)
 
+// Last middlewares setup
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 
