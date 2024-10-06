@@ -5,6 +5,7 @@ const logger = require('../utils/logger')
 const Student = require('../models/student')
 
 studentsRouter.get('/', async (req, res) => {
+  // TODO Only admins should be able to access this endpoint
   const students = await Student.findAll()
   res.status(200).json(students)
 })

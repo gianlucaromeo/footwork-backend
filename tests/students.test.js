@@ -1,4 +1,4 @@
-const { test, beforeEach } = require('node:test')
+const { test, beforeEach, after } = require('node:test')
 const assert = require('assert')
 const helper = require('./tests_helper')
 
@@ -22,6 +22,7 @@ beforeEach(async () => {
 })
 
 test('all students are returned as json', async () => {
+  // TODO Only admins should be able to access this endpoint
   await api
     .get('/students')
     .expect(200)
