@@ -1,0 +1,2 @@
+GET http://localhost:3001/students
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluMUAxLmNvbSIsImlkIjo1OSwiaWF0IjoxNzI4MjI3MDUyLCJleHAiOjE3MjgzOTk4NTJ9.Kug194-ivVvfmBWs-vSIYgInXk_Qz8SPr53YGknMxBM

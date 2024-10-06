@@ -1,18 +1,27 @@
 const studentsRouter = require('express').Router()
 const { isEmail } = require('validator')
 const bcrypt = require('bcrypt')
-const logger = require('../utils/logger')
 const Student = require('../models/student')
+const Admin = require('../models/admin')
+
+const findAdmin = async (id) => {
+  return await Admin.findOne({ where: { id: id } })
+}
 
 studentsRouter.get('/', async (req, res) => {
-  // TODO Only admins should be able to access this endpoint
+  const adminId = req.userId
+  const admin = findAdmin(adminId)
+
+  if (!admin) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
   const students = await Student.findAll()
   res.status(200).json(students)
 })
 
 studentsRouter.post('/', async (req, res) => {
   const student = req.body
-  logger.info('Received request to create new student:', student)
 
   const saltRounds = 10
   const passwordHash = await bcrypt.hash(student.password, saltRounds)
@@ -30,7 +39,6 @@ studentsRouter.post('/', async (req, res) => {
   }
 
   const newStudent = await Student.create(student)
-  logger.info('Student created:', newStudent)
   return res.status(201).json(newStudent)
 })
 

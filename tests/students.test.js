@@ -7,9 +7,23 @@ const api = supertest(app)
 
 const { sequelize } = require('../db/db')
 const Student = require('../models/student')
+const Admin = require('../models/admin')
 const helper = require('./tests_helper')
 
+let adminToken = null
+
 beforeEach(async () => {
+  await Admin.destroy({ where: {} })
+
+  await Promise.all(
+    helper.initialAdmins.map(admin =>
+      api.post('/admins')
+        .send(admin)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+    )
+  )
+
   await Student.destroy({ where: {} })
 
   await Promise.all(
@@ -19,6 +33,17 @@ beforeEach(async () => {
         .expect(201)
     )
   )
+
+  const adminLoginResponse = await api
+    .post('/login/admin')
+    .send({
+      email: helper.initialAdmins[0].email,
+      password: helper.initialAdmins[0].password
+    })
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  adminToken = adminLoginResponse.body.token
 })
 
 after(() => {
@@ -45,10 +70,10 @@ describe('When there are initially some students saved', async () => {
     assert(response.body.token)
   })
 
-  test('all students are returned as json', async () => {
-    // TODO Only admins should be able to access this endpoint
+  test('all students are returned as json to an admin', async () => {
     await api
       .get('/students')
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 

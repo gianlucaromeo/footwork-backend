@@ -9,6 +9,8 @@ const { sequelize } = require('../db/db')
 const Admin = require('../models/admin')
 const helper = require('./tests_helper')
 
+let adminToken = null
+
 beforeEach(async () => {
   await Admin.destroy({ where: {} })
 
@@ -17,8 +19,20 @@ beforeEach(async () => {
       api.post('/admins')
         .send(admin)
         .expect(201)
+        .expect('Content-Type', /application\/json/)
     )
   )
+
+  const adminLoginResponse = await api
+    .post('/login/admin')
+    .send({
+      email: helper.initialAdmins[0].email,
+      password: helper.initialAdmins[0].password
+    })
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  adminToken = adminLoginResponse.body.token
 })
 
 after(() => {
@@ -46,13 +60,29 @@ describe('When there are initially some admins saved', async () => {
   })
 
   test('all admins are returned as json', async () => {
-    // TODO Only admins should be able to access this endpoint
     await api
       .get('/admins')
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
     const admins = await Admin.findAll()
     assert.strictEqual(admins.length, helper.initialAdmins.length)
+  })
+
+  test('admins cannot be retrieved without a token', async () => {
+    await api
+      .get('/admins')
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
+  })
+
+  test('admins cannot be retrieved with an invalid token', async () => {
+    const invalidToken = 'Bearer invalidtoken'
+    await api
+      .get('/admins')
+      .set('Authorization', invalidToken)
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
   })
 })

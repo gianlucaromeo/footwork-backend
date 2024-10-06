@@ -43,7 +43,7 @@ async function loginUser(roleModel, request, response) {
 
   const payload = {
     email: user.email,
-    id: user._id
+    id: user.id
   }
 
   const token = createToken(payload)

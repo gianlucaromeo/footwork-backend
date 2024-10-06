@@ -12,6 +12,8 @@ const adminsRouter = require('./controllers/admins')
 app.use(cors())
 app.use(express.static('dist'))
 app.use(express.json())
+app.use(middleware.tokenExtractor)
+app.use(middleware.userIdExtractor)
 app.use(middleware.requestLogger)
 
 // MySQL connection
