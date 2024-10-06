@@ -51,10 +51,23 @@ const userIdExtractor = (request, response, next) => {
   next()
 }
 
+const userRoleExtractor = (request, response, next) => {
+  if (request.token) {
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    const userRole = decodedToken.role
+    request.userRole = userRole
+  } else {
+    request.userRole = null
+  }
+
+  next()
+}
+
 module.exports = {
   requestLogger,
   unknownEndpoint,
   errorHandler,
   tokenExtractor,
-  userIdExtractor
+  userIdExtractor,
+  userRoleExtractor
 }

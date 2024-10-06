@@ -21,6 +21,10 @@ studentsRouter.get('/', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
+  if (req.userRole !== 'admin') {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
   const students = await Student.findAll()
   res.status(200).json(students)
 })
@@ -59,6 +63,10 @@ studentsRouter.delete('/:id', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
+  if (req.userRole !== 'student') {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
   await Student.destroy({ where: { id: req.params.id } })
   return res.status(204).end()
 })
@@ -72,6 +80,10 @@ studentsRouter.put('/:id', async (req, res) => {
   }
 
   if (student.id.toString() !== req.params.id.toString()) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (req.userRole !== 'student') {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 

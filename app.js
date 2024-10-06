@@ -15,6 +15,7 @@ app.use(express.static('dist'))
 app.use(express.json())
 app.use(middleware.tokenExtractor)
 app.use(middleware.userIdExtractor)
+app.use(middleware.userRoleExtractor)
 app.use(middleware.requestLogger)
 
 // MySQL connection
