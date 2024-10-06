@@ -9,7 +9,7 @@ const { sequelize } = require('../db/db')
 const Admin = require('../models/admin')
 const helper = require('./tests_helper')
 
-let adminToken = null
+let firstAdminLoggedIn = null
 
 beforeEach(async () => {
   await Admin.destroy({ where: {} })
@@ -32,7 +32,7 @@ beforeEach(async () => {
     .expect(200)
     .expect('Content-Type', /application\/json/)
 
-  adminToken = adminLoginResponse.body.token
+  firstAdminLoggedIn = adminLoginResponse.body
 })
 
 after(() => {
@@ -62,7 +62,7 @@ describe('When there are initially some admins saved', async () => {
   test('all admins are returned as json', async () => {
     await api
       .get('/admins')
-      .set('Authorization', `Bearer ${adminToken}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
@@ -84,5 +84,62 @@ describe('When there are initially some admins saved', async () => {
       .set('Authorization', invalidToken)
       .expect(401)
       .expect('Content-Type', /application\/json/)
+  })
+
+  test('an admin can delete their own account', async () => {
+    await api
+      .delete(`/admins/${firstAdminLoggedIn.id}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+      .expect(204)
+
+    const admins = await Admin.findAll()
+    assert.strictEqual(admins.length, helper.initialAdmins.length - 1)
+  })
+
+  test('an admin cannot delete another admin account', async () => {
+    await api
+      .delete(`/admins/${helper.initialAdmins[1].id}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+      .expect(401)
+
+    const admins = await Admin.findAll()
+    assert.strictEqual(admins.length, helper.initialAdmins.length)
+  })
+
+  test('an admin cannot delete an admin account without a token', async () => {
+    await api
+      .delete(`/admins/${helper.initialAdmins[0].id}`)
+      .expect(401)
+  })
+
+  test('an admin cannot delete an admin account with an invalid token', async () => {
+    const invalidToken = 'Bearer invalidtoken'
+
+    await api
+      .delete(`/admins/${helper.initialAdmins[0].id}`)
+      .set('Authorization', invalidToken)
+      .expect(401)
+
+    const admins = await Admin.findAll()
+    assert.strictEqual(admins.length, helper.initialAdmins.length)
+  })
+
+  test('an admin can update their own account', async () => {
+    const updatedAdmin = {
+      firstName: 'Updated',
+      lastName: 'Admin',
+      email: 'new@email.com',
+      password: 'newpassword'
+    }
+
+    await api
+      .put(`/admins/${firstAdminLoggedIn.id}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+      .send(updatedAdmin)
+      .expect(200)
+
+    const admins = await Admin.findAll()
+    assert.strictEqual(admins.length, helper.initialAdmins.length)
+    assert(admins.map(a => a.email).includes(updatedAdmin.email))
   })
 })

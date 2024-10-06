@@ -40,4 +40,42 @@ adminsRouter.post('/', async (req, res) => {
   return res.status(201).json(newAdmin)
 })
 
+adminsRouter.delete('/:id', async (req, res) => {
+  const userId = req.userId
+  const admin = await findAdmin(userId)
+  if (!admin) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const id = req.params.id
+
+  if (!(id.toString() === userId.toString())) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const deleted = await Admin.destroy({ where: { id: id } })
+  if (deleted) {
+    return res.status(204).end()
+  } else {
+    return res.status(404).json({ error: 'Admin not found' })
+  }
+})
+
+adminsRouter.put('/:id', async (req, res) => {
+  const adminId = req.userId
+  const admin = await findAdmin(adminId)
+
+  if (!admin) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (admin.id.toString() !== req.params.id.toString()) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const updatedAdmin = req.body
+  await Admin.update(updatedAdmin, { where: { id: req.params.id } })
+  return res.status(200).end()
+})
+
 module.exports = adminsRouter

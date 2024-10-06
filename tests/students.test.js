@@ -12,6 +12,8 @@ const helper = require('./tests_helper')
 
 let adminToken = null
 
+let firstStudentLoggedIn = null
+
 beforeEach(async () => {
   await Admin.destroy({ where: {} })
 
@@ -44,6 +46,17 @@ beforeEach(async () => {
     .expect('Content-Type', /application\/json/)
 
   adminToken = adminLoginResponse.body.token
+
+  const firstStudentLoggedInRepsonse = await api
+    .post('/login/student')
+    .send({
+      email: helper.initialStudents[0].email,
+      password: helper.initialStudents[0].password
+    })
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  firstStudentLoggedIn = firstStudentLoggedInRepsonse.body
 })
 
 after(() => {
@@ -82,29 +95,31 @@ describe('When there are initially some students saved', async () => {
   })
 
   test('a student can delete their own account', async () => {
-    const student = helper.initialStudents[0]
-
-    const loginData = {
-      email: student.email,
-      password: student.password
-    }
-
-    const loginResponse = await api
-      .post('/login/student')
-      .send(loginData)
-      .expect(200)
-      .expect('Content-Type', /application\/json/)
-
-    const studentToken = loginResponse.body.token
-    const studentId = loginResponse.body.id
-
     await api
-      .delete(`/students/${studentId}`)
-      .set('Authorization', `Bearer ${studentToken}`)
+      .delete(`/students/${firstStudentLoggedIn.id}`)
+      .set('Authorization', `Bearer ${firstStudentLoggedIn.token}`)
       .expect(204)
 
     const students = await Student.findAll()
     assert.strictEqual(students.length, helper.initialStudents.length - 1)
-    assert(!students.map(s => s.id).includes(loginResponse.body.id))
+    assert(!students.map(s => s.id).includes(firstStudentLoggedIn.id))
+  })
+
+  test('a student can update their own account', async () => {
+    const updatedStudent = {
+      ...firstStudentLoggedIn,
+      email: 'new@email.com',
+      password: 'newpassword'
+    }
+
+    await api
+      .put(`/students/${firstStudentLoggedIn.id}`)
+      .set('Authorization', `Bearer ${firstStudentLoggedIn.token}`)
+      .send(updatedStudent)
+      .expect(200)
+
+    const students = await Student.findAll()
+    assert.strictEqual(students.length, helper.initialStudents.length)
+    assert(students.map(s => s.email).includes(updatedStudent.email))
   })
 })

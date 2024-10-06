@@ -63,4 +63,21 @@ studentsRouter.delete('/:id', async (req, res) => {
   return res.status(204).end()
 })
 
+studentsRouter.put('/:id', async (req, res) => {
+  const studentId = req.userId
+  const student = await findStudent(studentId)
+
+  if (!student) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (student.id.toString() !== req.params.id.toString()) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const updatedStudent = req.body
+  await Student.update(updatedStudent, { where: { id: req.params.id } })
+  return res.status(200).end()
+})
+
 module.exports = studentsRouter
