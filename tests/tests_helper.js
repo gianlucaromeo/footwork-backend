@@ -28,7 +28,17 @@ const initialAdmins = [
   }
 ]
 
+const initialCourses = [
+  {
+    'name': 'Course 1',
+  },
+  {
+    'name': 'Course 2',
+  }
+]
+
 module.exports = {
   initialStudents,
-  initialAdmins
+  initialAdmins,
+  initialCourses
 }
