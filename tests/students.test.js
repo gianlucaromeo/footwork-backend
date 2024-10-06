@@ -1,13 +1,13 @@
-const { test, beforeEach, after } = require('node:test')
+const { describe, test, beforeEach, after } = require('node:test')
 const assert = require('assert')
-const helper = require('./tests_helper')
-
-const Student = require('../models/student')
 
 const app = require('../app')
 const supertest = require('supertest')
 const api = supertest(app)
 
+const { sequelize } = require('../db/db')
+const Student = require('../models/student')
+const helper = require('./tests_helper')
 
 beforeEach(async () => {
   await Student.destroy({ where: {} })
@@ -21,13 +21,39 @@ beforeEach(async () => {
   )
 })
 
-test('all students are returned as json', async () => {
-  // TODO Only admins should be able to access this endpoint
-  await api
-    .get('/students')
-    .expect(200)
-    .expect('Content-Type', /application\/json/)
+after(() => {
+  console.log(app.sequelize)
+  sequelize.close()
+})
 
-  const students = await Student.findAll()
-  assert.strictEqual(students.length, helper.initialStudents.length)
+describe('When there are initially some students saved', () => {
+  test('a valid student can login', async () => {
+    const student = helper.initialStudents[0]
+
+    const loginData = {
+      email: student.email,
+      password: student.password
+    }
+
+    const response = await api
+      .post('/login/student')
+      .send(loginData)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    assert.strictEqual(response.body.email, student.email)
+    assert.strictEqual(response.body.name, student.name)
+    assert(response.body.token)
+  })
+
+  test('all students are returned as json', async () => {
+    // TODO Only admins should be able to access this endpoint
+    await api
+      .get('/students')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const students = await Student.findAll()
+    assert.strictEqual(students.length, helper.initialStudents.length)
+  })
 })

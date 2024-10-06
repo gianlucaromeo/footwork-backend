@@ -5,6 +5,7 @@ const cors = require('cors')
 const middleware = require('./utils/middleware')
 const { sequelize } = require('./db/db')
 const studentsRouter = require('./controllers/students')
+const loginRouter = require('./controllers/login')
 
 // Middleware setup
 app.use(cors())
@@ -26,6 +27,7 @@ sequelize.authenticate()
 
 // TODO add routers here
 app.use('/students', studentsRouter)
+app.use('/login', loginRouter)
 
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
