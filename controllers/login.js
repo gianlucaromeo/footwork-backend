@@ -50,7 +50,7 @@ async function loginUser(roleModel, request, response) {
 
   response
     .status(200)
-    .send({ token, email: user.email, name: user.name })
+    .send({ token, email: user.email, id: user.id })
 }
 
 // Admin login

@@ -80,4 +80,31 @@ describe('When there are initially some students saved', async () => {
     const students = await Student.findAll()
     assert.strictEqual(students.length, helper.initialStudents.length)
   })
+
+  test('a student can delete their own account', async () => {
+    const student = helper.initialStudents[0]
+
+    const loginData = {
+      email: student.email,
+      password: student.password
+    }
+
+    const loginResponse = await api
+      .post('/login/student')
+      .send(loginData)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const studentToken = loginResponse.body.token
+    const studentId = loginResponse.body.id
+
+    await api
+      .delete(`/students/${studentId}`)
+      .set('Authorization', `Bearer ${studentToken}`)
+      .expect(204)
+
+    const students = await Student.findAll()
+    assert.strictEqual(students.length, helper.initialStudents.length - 1)
+    assert(!students.map(s => s.id).includes(loginResponse.body.id))
+  })
 })

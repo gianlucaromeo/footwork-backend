@@ -4,13 +4,18 @@ const bcrypt = require('bcrypt')
 const Student = require('../models/student')
 const Admin = require('../models/admin')
 
+
 const findAdmin = async (id) => {
   return await Admin.findOne({ where: { id: id } })
 }
 
+const findStudent = async (id) => {
+  return await Student.findOne({ where: { id: id } })
+}
+
 studentsRouter.get('/', async (req, res) => {
   const adminId = req.userId
-  const admin = findAdmin(adminId)
+  const admin = await findAdmin(adminId)
 
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized' })
@@ -40,6 +45,22 @@ studentsRouter.post('/', async (req, res) => {
 
   const newStudent = await Student.create(student)
   return res.status(201).json(newStudent)
+})
+
+studentsRouter.delete('/:id', async (req, res) => {
+  const studentId = req.userId
+  const student = await findStudent(studentId)
+
+  if (!student) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (student.id.toString() !== req.params.id.toString()) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  await Student.destroy({ where: { id: req.params.id } })
+  return res.status(204).end()
 })
 
 module.exports = studentsRouter
