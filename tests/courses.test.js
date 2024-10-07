@@ -50,7 +50,7 @@ describe('When there are initially some courses saved', async () => {
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    assert.strictEqual(response.body.length, 2)
+    assert.strictEqual(response.body.length, 1)
   })
 
   test('a user cannot get all their courses without token', async () => {

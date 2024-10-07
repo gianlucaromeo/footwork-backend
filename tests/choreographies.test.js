@@ -3,59 +3,60 @@ const assert = require('assert')
 const { sequelize } = require('../db/db')
 const helper = require('./tests_helper')
 
-const Student = require('../models/student')
+const Choreography = require('../models/choreography')
 const Course = require('../models/course')
 
 const app = require('../app')
 const supertest = require('supertest')
-const Enrollment = require('../models/enrollment')
 const api = supertest(app)
 
 let firstAdminLoggedIn = null
-let initialEnrollments = null
+let initialChoreographies = null
 
 beforeEach(async () => {
   const dbData = await helper.initizliaseDatabase()
-  initialEnrollments = dbData.initialEnrollments
   firstAdminLoggedIn = dbData.firstAdminLoggedIn
+  initialChoreographies = dbData.initialChoreographies
 })
 
 after(() => {
   sequelize.close()
 })
 
-describe('when there are initially some enrollments', () => {
-  test('an admin can retrieve all the enrollments', async () => {
+describe('when there are initially some choreographies', () => {
+  test('an admin can retrieve all the choreographies', async () => {
     const response = await api
-      .get('/enrollments')
+      .get('/choreographies/admin/all')
       .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    assert.strictEqual(response.body.length, initialEnrollments.length)
+    assert.strictEqual(
+      response.body.length,
+      initialChoreographies.length
+    )
   })
 
-  test('an admin can create a new enrollment', async () => {
-    const students = await Student.findAll({ where: {} })
+  test('an admin can create a new choreography', async () => {
     const courses = await Course.findAll({ where: {} })
 
-    const newEnrollment = {
-      studentId: students[1].id,
-      courseId: courses[1].id,
+    const newChoreography = {
+      title: 'New Choreography',
+      courseId: courses[0].id
     }
 
     const response = await api
-      .post('/enrollments')
+      .post('/choreographies')
       .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
-      .send(newEnrollment)
+      .send(newChoreography)
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
-    assert.strictEqual(response.body.studentId, newEnrollment.studentId)
-    assert.strictEqual(response.body.courseId, newEnrollment.courseId)
+    assert.strictEqual(response.body.title, newChoreography.title)
+    assert.strictEqual(response.body.courseId, newChoreography.courseId)
 
-    const enrollments = await Enrollment.findAll()
-    assert.strictEqual(enrollments.length, initialEnrollments.length + 1)
+    const choreographies = await Choreography.findAll()
+    assert.strictEqual(choreographies.length, initialChoreographies.length + 1)
   })
 })
 

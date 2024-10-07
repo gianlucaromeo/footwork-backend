@@ -55,6 +55,18 @@ enrollmentsRouter.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Name is required' })
   }
 
+  const existingEnrollment = await Enrollment.findOne({
+    where: {
+      studentId: student.id,
+      courseId: course.id,
+    },
+  })
+
+  if (existingEnrollment) {
+    console.log('Enrollment already exists')
+    return res.status(400).json({ error: 'Enrollment already exists' })
+  }
+
   const enrollment = await Enrollment.create({
     studentId: student.id,
     courseId: course.id,

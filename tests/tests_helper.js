@@ -42,11 +42,13 @@ const initizliaseDatabase = async () => {
   const Student = require('../models/student')
   const Course = require('../models/course')
   const Enrollment = require('../models/enrollment')
+  const Choreography = require('../models/choreography')
 
   await Enrollment.destroy({ where: {} })
-  await Admin.destroy({ where: {} })
-  await Student.destroy({ where: {} })
+  await Choreography.destroy({ where: {} })
   await Course.destroy({ where: {} })
+  await Student.destroy({ where: {} })
+  await Admin.destroy({ where: {} })
 
   const app = require('../app')
   const supertest = require('supertest')
@@ -55,7 +57,6 @@ const initizliaseDatabase = async () => {
   let firstAdminLoggedIn = null
   let firstStudentLoggedIn = null
   let firstCourse = null
-  let secondCourse = null
 
   await Promise.all(
     initialAdmins.map(admin =>
@@ -115,7 +116,6 @@ const initizliaseDatabase = async () => {
     expect('Content-Type', /application\/json/)
 
   firstCourse = allCoursesResponse.body[0]
-  secondCourse = allCoursesResponse.body[1]
 
   const firstEnrollment = {
     studentId: firstStudentLoggedIn.id,
@@ -129,29 +129,32 @@ const initizliaseDatabase = async () => {
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
-  const secondEnrollment = {
-    studentId: firstStudentLoggedIn.id,
-    courseId: secondCourse.id
+  const initialEnrollments = [
+    firstEnrollment,
+  ]
+
+  const newChoreography = {
+    title: 'Choreography 1',
+    courseId: firstCourse.id
   }
 
   await api
-    .post('/enrollments')
+    .post('/choreographies')
     .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
-    .send(secondEnrollment)
+    .send(newChoreography)
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
-  const initialEnrollments = [
-    firstEnrollment,
-    secondEnrollment
+  const initialChoreographies = [
+    newChoreography
   ]
 
   return {
     firstAdminLoggedIn,
     firstStudentLoggedIn,
     firstCourse,
-    secondCourse,
-    initialEnrollments
+    initialEnrollments,
+    initialChoreographies
   }
 }
 

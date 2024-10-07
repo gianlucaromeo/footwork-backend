@@ -9,11 +9,13 @@ const loginRouter = require('./controllers/login')
 const adminsRouter = require('./controllers/admins')
 const coursesRouter = require('./controllers/courses')
 const enrollmentsRouter = require('./controllers/enrollments')
+const choreographiesRouter = require('./controllers/choreographies')
 
 // Relationships
 const Student = require('./models/student')
 const Course = require('./models/course')
 const Enrollment = require('./models/enrollment')
+const Choreography = require('./models/choreography')
 
 Course.belongsToMany(Student, {
   through: Enrollment,
@@ -23,6 +25,14 @@ Course.belongsToMany(Student, {
 Student.belongsToMany(Course, {
   through: Enrollment,
   foreignKey: 'studentId'
+})
+
+Course.hasMany(Choreography, {
+  foreignKey: 'courseId'
+})
+
+Choreography.belongsTo(Course, {
+  foreignKey: 'courseId'
 })
 
 // First middlewares setup
@@ -52,6 +62,7 @@ app.use('/admins', adminsRouter)
 app.use('/login', loginRouter)
 app.use('/courses', coursesRouter)
 app.use('/enrollments', enrollmentsRouter)
+app.use('/choreographies', choreographiesRouter)
 
 // Last middlewares setup
 app.use(middleware.unknownEndpoint)
