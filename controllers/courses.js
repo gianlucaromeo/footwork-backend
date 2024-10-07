@@ -11,7 +11,7 @@ const findStudent = async (id) => {
   return await Student.findOne({ where: { id: id } })
 }
 
-coursesRouter.get('/', async (req, res) => {
+coursesRouter.get('/admin/all', async (req, res) => {
   const adminId = req.userId
   const admin = await findAdmin(adminId)
 

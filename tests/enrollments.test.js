@@ -40,7 +40,7 @@ describe('when there are initially some enrollments', () => {
       .expect('Content-Type', /application\/json/)
 
     const courses = await api
-      .get('/courses')
+      .get('/courses/admin/all')
       .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
       .expect(200)
       .expect('Content-Type', /application\/json/)
