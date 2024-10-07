@@ -59,6 +59,7 @@ enrollmentsRouter.post('/', async (req, res) => {
     studentId: student.id,
     courseId: course.id,
   })
+
   return res.status(201).json(enrollment)
 })
 

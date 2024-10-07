@@ -3,6 +3,9 @@ const assert = require('assert')
 const { sequelize } = require('../db/db')
 const helper = require('./tests_helper')
 
+const Student = require('../models/student')
+const Course = require('../models/course')
+
 const app = require('../app')
 const supertest = require('supertest')
 const Enrollment = require('../models/enrollment')
@@ -33,21 +36,12 @@ describe('when there are initially some enrollments', () => {
   })
 
   test('an admin can create a new enrollment', async () => {
-    const students = await api
-      .get('/students')
-      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
-      .expect(200)
-      .expect('Content-Type', /application\/json/)
-
-    const courses = await api
-      .get('/courses/admin/all')
-      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
-      .expect(200)
-      .expect('Content-Type', /application\/json/)
+    const students = await Student.findAll({ where: {} })
+    const courses = await Course.findAll({ where: {} })
 
     const newEnrollment = {
-      studentId: students.body[0].id,
-      courseId: courses.body[1].id
+      studentId: students[1].id,
+      courseId: courses[0].id
     }
 
     const response = await api
@@ -60,8 +54,7 @@ describe('when there are initially some enrollments', () => {
     assert.strictEqual(response.body.studentId, newEnrollment.studentId)
     assert.strictEqual(response.body.courseId, newEnrollment.courseId)
 
-    const enrollments = await Enrollment.findAll({ where: {} })
-
+    const enrollments = await Enrollment.findAll()
     assert.strictEqual(enrollments.length, initialEnrollments.length + 1)
   })
 })
