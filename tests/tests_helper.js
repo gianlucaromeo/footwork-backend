@@ -55,7 +55,7 @@ const initizliaseDatabase = async () => {
   let firstAdminLoggedIn = null
   let firstStudentLoggedIn = null
   let firstCourse = null
-
+  let secondCourse = null
 
   await Promise.all(
     initialAdmins.map(admin =>
@@ -108,16 +108,16 @@ const initizliaseDatabase = async () => {
     )
   )
 
-  const firstCourseResponse = await api
+  const allCoursesResponse = await api
     .get('/courses').
     set('Authorization', `Bearer ${firstAdminLoggedIn.token}`).
     expect(200).
     expect('Content-Type', /application\/json/)
 
-  firstCourse = firstCourseResponse.body[0]
+  firstCourse = allCoursesResponse.body[0]
+  secondCourse = allCoursesResponse.body[1]
 
-
-  const enrollment = {
+  const firstEnrollment = {
     studentId: firstStudentLoggedIn.id,
     courseId: firstCourse.id
   }
@@ -125,13 +125,34 @@ const initizliaseDatabase = async () => {
   await api
     .post('/enrollments')
     .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
-    .send(enrollment)
+    .send(firstEnrollment)
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
-  const initialEnrollments = [enrollment]
+  const secondEnrollment = {
+    studentId: firstStudentLoggedIn.id,
+    courseId: secondCourse.id
+  }
 
-  return { firstAdminLoggedIn, firstStudentLoggedIn, firstCourse, initialEnrollments }
+  await api
+    .post('/enrollments')
+    .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+    .send(secondEnrollment)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const initialEnrollments = [
+    firstEnrollment,
+    secondEnrollment
+  ]
+
+  return {
+    firstAdminLoggedIn,
+    firstStudentLoggedIn,
+    firstCourse,
+    secondCourse,
+    initialEnrollments
+  }
 }
 
 module.exports = {
