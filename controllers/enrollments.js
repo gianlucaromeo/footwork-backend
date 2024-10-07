@@ -55,8 +55,6 @@ enrollmentsRouter.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Name is required' })
   }
 
-  console.log('body:', req.body)
-
   const enrollment = await Enrollment.create(req.body)
   return res.status(201).json(enrollment)
 })

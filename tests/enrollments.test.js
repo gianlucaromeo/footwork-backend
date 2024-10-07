@@ -62,15 +62,6 @@ describe('when there are initially some enrollments', () => {
 
     const enrollments = await Enrollment.findAll({ where: {} })
 
-    console.log('Enrollments:')
-    enrollments.forEach(enrollment => {
-      console.log(enrollment.toJSON())
-    })
-
-    console.log('Initial enrollments:')
-    initialEnrollments.forEach(enrollment => {
-      console.log(enrollment)
-    })
     assert.strictEqual(enrollments.length, initialEnrollments.length + 1)
   })
 })
