@@ -16,6 +16,7 @@ const Course = sequelize.define('course', {
   },
 }, {
   tableName: 'courses',
+  underscored: true,
 })
 
 module.exports = Course

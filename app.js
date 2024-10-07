@@ -17,7 +17,7 @@ const Enrollment = require('./models/enrollment')
 
 Course.belongsToMany(Student, {
   through: Enrollment,
-  foreignKey: 'courseId'
+  foreignKey: 'courseId',
 })
 
 Student.belongsToMany(Course, {
