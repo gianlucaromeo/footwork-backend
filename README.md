@@ -10,36 +10,40 @@ title: Footwork - Database Structure
 erDiagram
     ADMIN {
         BIG_INT id PK
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
         STRING first_name
         STRING last_name
         STRING email UK
         BOOL email_confirmed
         STRING password
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
 
     STUDENT {
         BIG_INT id PK
-        TIMESTAMP created_at
-        TIMESTAMP updated_at
         STRING first_name
         STRING last_name
         STRING email UK
         BOOL email_confirmed
         STRING password
         BOOL verified_by_admin
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
 
     COURSE {
         BIG_INT id PK
         STRING name
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
 
     CHOREOGRAPHY {
         BIG_INT id PK
         STRING title
         BIG_INT course_id FK
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
     }
 
     VIDEO {
@@ -47,15 +51,15 @@ erDiagram
         STRING cover_image_url
         STRING video_url
         STRING title
+        BIG_INT choreography_id FK
         TIMESTAMP created_at
         TIMESTAMP updated_at
-        BIG_INT choreography_id FK
     }
 
     ENROLLMENT {
         BIG_INT student_id FK "Composite PK (student_id, course_id)"
         BIG_INT course_id FK "Composite PK (student_id, course_id)"
-        TIMESTAMP enrolled_at
+        TIMESTAMP created_at
         TIMESTAMP updated_at
     }
     
