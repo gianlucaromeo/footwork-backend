@@ -1,5 +1,7 @@
-# footwork-backend
-Backend of Footwork: a dance video management system for dance schools and association.
+# Footwork - Backend
+Footwork is a dance video management system for dance schools and associations.
+
+<img width="1800" alt="footwork-sample" src="https://github.com/user-attachments/assets/fb193522-fb59-4bf8-88d6-001b5d42f8e0">
 
 ## Database structure - draft
 Creted with mermaid. Note: composite keys are not available in mermaid syntax yet.
