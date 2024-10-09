@@ -41,7 +41,7 @@ describe('when there are initially some enrollments', () => {
 
     const newEnrollment = {
       studentId: students[1].id,
-      courseId: courses[1].id,
+      courseId: courses[0].id,
     }
 
     const response = await api
