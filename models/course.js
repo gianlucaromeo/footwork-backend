@@ -19,10 +19,4 @@ const Course = sequelize.define('course', {
   underscored: true,
 })
 
-Course.prototype.toJSON = function () {
-  const values = Object.assign({}, this.get())
-  delete values.students
-  return values
-}
-
 module.exports = Course

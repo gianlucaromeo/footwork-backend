@@ -43,8 +43,10 @@ const initizliaseDatabase = async () => {
   const Course = require('../models/course')
   const Enrollment = require('../models/enrollment')
   const Choreography = require('../models/choreography')
+  const Video = require('../models/video')
 
   await Enrollment.destroy({ where: {} })
+  await Video.destroy({ where: {} })
   await Choreography.destroy({ where: {} })
   await Course.destroy({ where: {} })
   await Student.destroy({ where: {} })
@@ -56,7 +58,9 @@ const initizliaseDatabase = async () => {
 
   let firstAdminLoggedIn = null
   let firstStudentLoggedIn = null
+  let secondStudentLoggedIn = null
   let firstCourse = null
+  let secondCourse = null
 
   await Promise.all(
     initialAdmins.map(admin =>
@@ -98,6 +102,17 @@ const initizliaseDatabase = async () => {
 
   firstStudentLoggedIn = firstStudentLoggedInRepsonse.body
 
+  const secondStudentLoggedInRepsonse = await api
+    .post('/login/student')
+    .send({
+      email: initialStudents[1].email,
+      password: initialStudents[1].password
+    })
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  secondStudentLoggedIn = secondStudentLoggedInRepsonse.body
+
 
   await Promise.all(
     initialCourses.map(course =>
@@ -116,6 +131,7 @@ const initizliaseDatabase = async () => {
     expect('Content-Type', /application\/json/)
 
   firstCourse = allCoursesResponse.body[0]
+  secondCourse = allCoursesResponse.body[1]
 
   const firstEnrollment = {
     studentId: firstStudentLoggedIn.id,
@@ -129,8 +145,21 @@ const initizliaseDatabase = async () => {
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
+  const secondEnrollment = {
+    studentId: secondStudentLoggedIn.id,
+    courseId: secondCourse.id
+  }
+
+  await api
+    .post('/enrollments')
+    .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+    .send(secondEnrollment)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
   const initialEnrollments = [
     firstEnrollment,
+    secondEnrollment
   ]
 
   const newChoreography = {
@@ -138,7 +167,7 @@ const initizliaseDatabase = async () => {
     courseId: firstCourse.id
   }
 
-  await api
+  const coreographiesResponse = await api
     .post('/choreographies')
     .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
     .send(newChoreography)
@@ -149,12 +178,35 @@ const initizliaseDatabase = async () => {
     newChoreography
   ]
 
+  const newVideo = {
+    title: 'Video 1',
+    videoUrl: 'https://www.youtube.com/watch?v=1',
+    coverImageUrl: 'https://www.youtube.com/watch?v=1',
+    choreographyId: coreographiesResponse.body.id
+  }
+
+  const videosResponse = await api
+    .post('/videos')
+    .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+    .send(newVideo)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const firstVideo = videosResponse.body
+
+  const initialVideos = [
+    firstVideo
+  ]
+
   return {
     firstAdminLoggedIn,
     firstStudentLoggedIn,
+    secondStudentLoggedIn,
     firstCourse,
+    secondCourse,
     initialEnrollments,
-    initialChoreographies
+    initialChoreographies,
+    initialVideos
   }
 }
 
