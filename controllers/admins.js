@@ -82,7 +82,6 @@ adminsRouter.put('/:id', async (req, res) => {
 })
 
 
-// Update from admin
 adminsRouter.put('/student/:id', async (req, res) => {
   const adminId = req.userId
   const admin = await findAdmin(adminId)
