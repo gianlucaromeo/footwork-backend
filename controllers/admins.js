@@ -2,6 +2,9 @@ const adminsRouter = require('express').Router()
 const { isEmail } = require('validator')
 const bcrypt = require('bcrypt')
 const Admin = require('../models/admin')
+const Student = require('../models/student')
+const Enrollment = require('../models/enrollment')
+const Course = require('../models/course')
 
 const findAdmin = async (id) => {
   return await Admin.findOne({ where: { id: id } })
@@ -75,6 +78,47 @@ adminsRouter.put('/:id', async (req, res) => {
 
   const updatedAdmin = req.body
   await Admin.update(updatedAdmin, { where: { id: req.params.id } })
+  return res.status(200).end()
+})
+
+
+// Update from admin
+adminsRouter.put('/student/:id', async (req, res) => {
+  const adminId = req.userId
+  const admin = await findAdmin(adminId)
+
+  if (!admin) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (req.userRole !== 'admin') {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const newCourses = req.body.courses
+  if (!newCourses) {
+    return res.status(400).json({ error: 'Courses are required' })
+  }
+
+  const student = await Student.findOne({ where: { id: req.params.id } })
+  if (!student) {
+    return res.status(400).json({ error: 'Student not found' })
+  }
+
+  await Enrollment.destroy({ where: { studentId: student.id } })
+
+  // TODO: Change with bulk create
+  for (const courseId of newCourses) {
+    const courseExsists = await Course.findOne({ where: { id: courseId } })
+    if (!courseExsists) {
+      return res.status(400).json({ error: 'Course not found' })
+    }
+  }
+
+  for (const courseId of newCourses) {
+    await Enrollment.create({ studentId: student.id, courseId: courseId })
+  }
+
   return res.status(200).end()
 })
 

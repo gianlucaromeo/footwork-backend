@@ -10,10 +10,14 @@ const Admin = require('../models/admin')
 const helper = require('./tests_helper')
 
 let firstAdminLoggedIn = null
+let firstStudentLoggedIn = null
+let secondCourse = null
 
 beforeEach(async () => {
   const users = await helper.initizliaseDatabase()
   firstAdminLoggedIn = users.firstAdminLoggedIn
+  firstStudentLoggedIn = users.firstStudentLoggedIn
+  secondCourse = users.secondCourse
 })
 
 after(() => {
@@ -122,5 +126,19 @@ describe('When there are initially some admins saved', async () => {
     const admins = await Admin.findAll()
     assert.strictEqual(admins.length, helper.initialAdmins.length)
     assert(admins.map(a => a.email).includes(updatedAdmin.email))
+  })
+
+  test('an admin can update the courses a student is enrolled in', async () => {
+    const studentId = firstStudentLoggedIn.id
+
+    const updatedStudent = {
+      id: studentId,
+      courses: [secondCourse.id]
+    }
+
+    await api.put(`/admins/student/${studentId}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+      .send(updatedStudent)
+      .expect(200)
   })
 })
