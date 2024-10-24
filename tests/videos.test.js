@@ -52,6 +52,6 @@ describe('When there are initially some videos saved', () => {
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    assert(secondStudentVideosResponse.body.length === 0)
+    assert(secondStudentVideosResponse.body.length === 1)
   })
 })

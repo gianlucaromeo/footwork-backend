@@ -71,15 +71,6 @@ const initizliaseDatabase = async () => {
     )
   )
 
-
-  await Promise.all(
-    initialStudents.map(student =>
-      api.post('/students')
-        .send(student)
-        .expect(201)
-    )
-  )
-
   const adminLoginResponse = await api
     .post('/login/admin')
     .send({
@@ -90,6 +81,36 @@ const initizliaseDatabase = async () => {
     .expect('Content-Type', /application\/json/)
 
   firstAdminLoggedIn = adminLoginResponse.body
+
+  await Promise.all(
+    initialCourses.map(course =>
+      api.post('/courses')
+        .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+        .send(course)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+    )
+  )
+
+  const allCoursesResponse = await api
+    .get('/courses/admin/all').
+    set('Authorization', `Bearer ${firstAdminLoggedIn.token}`).
+    expect(200).
+    expect('Content-Type', /application\/json/)
+
+  firstCourse = allCoursesResponse.body[0]
+  secondCourse = allCoursesResponse.body[1]
+
+  await Promise.all(
+    initialStudents.map(student =>
+      api.post('/students')
+        .send({
+          student: student,
+          courses: [firstCourse.id],
+        })
+        .expect(201)
+    )
+  )
 
   const firstStudentLoggedInRepsonse = await api
     .post('/login/student')
@@ -113,49 +134,15 @@ const initizliaseDatabase = async () => {
 
   secondStudentLoggedIn = secondStudentLoggedInRepsonse.body
 
-
-  await Promise.all(
-    initialCourses.map(course =>
-      api.post('/courses')
-        .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
-        .send(course)
-        .expect(201)
-        .expect('Content-Type', /application\/json/)
-    )
-  )
-
-  const allCoursesResponse = await api
-    .get('/courses/admin/all').
-    set('Authorization', `Bearer ${firstAdminLoggedIn.token}`).
-    expect(200).
-    expect('Content-Type', /application\/json/)
-
-  firstCourse = allCoursesResponse.body[0]
-  secondCourse = allCoursesResponse.body[1]
-
   const firstEnrollment = {
     studentId: firstStudentLoggedIn.id,
     courseId: firstCourse.id
   }
 
-  await api
-    .post('/enrollments')
-    .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
-    .send(firstEnrollment)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
-
   const secondEnrollment = {
     studentId: secondStudentLoggedIn.id,
-    courseId: secondCourse.id
+    courseId: firstCourse.id
   }
-
-  await api
-    .post('/enrollments')
-    .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
-    .send(secondEnrollment)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
 
   const initialEnrollments = [
     firstEnrollment,

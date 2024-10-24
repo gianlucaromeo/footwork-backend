@@ -3,6 +3,8 @@ const { isEmail } = require('validator')
 const bcrypt = require('bcrypt')
 const Student = require('../models/student')
 const Admin = require('../models/admin')
+const Enrollment = require('../models/enrollment')
+const Course = require('../models/course')
 
 
 const findAdmin = async (id) => {
@@ -30,7 +32,7 @@ studentsRouter.get('/', async (req, res) => {
 })
 
 studentsRouter.post('/', async (req, res) => {
-  const student = req.body
+  const student = req.body.student
 
   const saltRounds = 10
   const passwordHash = await bcrypt.hash(student.password, saltRounds)
@@ -47,7 +49,27 @@ studentsRouter.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Email is not valid' })
   }
 
+
+  const courses = req.body.courses
+
+  if (courses) {
+    for (const courseId of courses) {
+      const course = await Course.findOne({ where: { id: courseId } })
+      if (!course) {
+        return res.status(400).json({ error: 'One or more courses not found' })
+      }
+    }
+  }
+
   const newStudent = await Student.create(student)
+
+  for (const courseId of courses) {
+    await Enrollment.create({
+      studentId: newStudent.id,
+      courseId: courseId,
+    })
+  }
+
   return res.status(201).json(newStudent)
 })
 
