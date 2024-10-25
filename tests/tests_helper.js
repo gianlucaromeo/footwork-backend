@@ -84,8 +84,6 @@ const initizliaseDatabase = async () => {
 
   firstAdminLoggedIn = adminLoginResponse.body
 
-  console.log('before courses')
-
   await Promise.all(
     initialCourses.map(course =>
       api.post('/courses')
@@ -96,15 +94,11 @@ const initizliaseDatabase = async () => {
     )
   )
 
-  console.log('before courses')
-
   const allCoursesResponse = await api
     .get('/courses/admin/all').
     set('Authorization', `Bearer ${firstAdminLoggedIn.token}`).
     expect(200).
     expect('Content-Type', /application\/json/)
-
-  console.log('after getting courses')
 
   firstCourse = allCoursesResponse.body[0]
   secondCourse = allCoursesResponse.body[1]
