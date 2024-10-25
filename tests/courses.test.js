@@ -27,6 +27,7 @@ describe('When there are initially some courses saved', async () => {
   test('an admin can create a course', async () => {
     const newCourse = {
       name: 'New Course',
+      imageUrl: 'https://example.com/image.jpg',
     }
 
     await api

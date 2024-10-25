@@ -44,6 +44,10 @@ choreographiesRouter.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Title and courseId are required' })
   }
 
+  if (!req.body.imageUrl) {
+    return res.status(400).json({ error: 'Image URL is required' })
+  }
+
   const course = await findCourse(req.body.courseId)
 
   if (!course) {
@@ -52,7 +56,8 @@ choreographiesRouter.post('/', async (req, res) => {
 
   const newChoreographyData = {
     title: req.body.title,
-    courseId: req.body.courseId
+    courseId: req.body.courseId,
+    imageUrl: req.body.imageUrl
   }
 
   const newChoreography = await Choreography.create(newChoreographyData)

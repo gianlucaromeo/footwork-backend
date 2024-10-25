@@ -39,10 +39,14 @@ coursesRouter.post('/', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
+  // TODO Handle image upload
+
   const course = req.body
 
   if (!course.name) {
     return res.status(400).json({ error: 'Name is required' })
+  } else if (!course.imageUrl) {
+    return res.status(400).json({ error: 'Image URL is required' })
   }
 
   const newCourse = await Course.create(course)

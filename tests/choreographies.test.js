@@ -42,7 +42,8 @@ describe('when there are initially some choreographies', () => {
 
     const newChoreography = {
       title: 'New Choreography',
-      courseId: courses[0].id
+      courseId: courses[0].id,
+      imageUrl: 'https://example.com/image.jpg',
     }
 
     const response = await api
