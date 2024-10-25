@@ -42,6 +42,7 @@ erDiagram
     COURSE {
         BIG_INT id PK
         STRING name
+        STRING image_url
         TIMESTAMP created_at
         TIMESTAMP updated_at
     }
@@ -49,6 +50,7 @@ erDiagram
     CHOREOGRAPHY {
         BIG_INT id PK
         STRING title
+        STRING image_url
         BIG_INT course_id FK
         TIMESTAMP created_at
         TIMESTAMP updated_at
