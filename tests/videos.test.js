@@ -13,6 +13,7 @@ let firstAdminLoggedIn = null
 let firstStudentLoggedIn = null
 let secondStudentLoggedIn = null
 let initialVideos = null
+let initialChoreographies = null
 
 beforeEach(async () => {
   const dbData = await helper.initizliaseDatabase()
@@ -20,6 +21,7 @@ beforeEach(async () => {
   firstStudentLoggedIn = dbData.firstStudentLoggedIn
   initialVideos = dbData.initialVideos
   secondStudentLoggedIn = dbData.secondStudentLoggedIn
+  initialChoreographies = dbData.initialChoreographies
 })
 
 after(async () => {
@@ -53,5 +55,32 @@ describe('When there are initially some videos saved', () => {
       .expect('Content-Type', /application\/json/)
 
     assert(secondStudentVideosResponse.body.length === 1)
+  })
+})
+
+const path = require('path')
+const fs = require('fs')
+
+describe('Video Upload API', () => {
+  test('an admin can upload a video and cover image', async () => {
+    const videoFilePath = path.join(__dirname, 'test-video.mp4')
+    const coverImagePath = path.join(__dirname, 'test-cover.png')
+    const videoFile = fs.readFileSync(videoFilePath)
+    const coverImageFile = fs.readFileSync(coverImagePath)
+
+    const response = await api
+      .post('/videos')
+      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+      .field('title', 'Test Video')
+      .field('choreographyId', initialChoreographies[0].id)
+      .field('folder', '/tests')
+      .attach('video', videoFile, { contentType: 'video/mp4', filename: 'test-video.mp4' })
+      .attach('coverImage', coverImageFile, { contentType: 'image/png', filename: 'test-cover.png' })
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    assert(response.body.title === 'Test Video')
+    assert(response.body.coverImageUrl !== undefined)
+    assert(response.body.videoUrl !== undefined)
   })
 })

@@ -164,21 +164,32 @@ const initizliaseDatabase = async () => {
     .expect(201)
     .expect('Content-Type', /application\/json/)
 
+  const firstChoreography = coreographiesResponse.body
+
   const initialChoreographies = [
-    newChoreography
+    firstChoreography
   ]
+
+  const path = require('path')
+  const fs = require('fs')
+  const videoFilePath = path.join(__dirname, 'test-video.mp4')
+  const coverImagePath = path.join(__dirname, 'test-cover.png')
+  const videoFile = fs.readFileSync(videoFilePath)
+  const coverImageFile = fs.readFileSync(coverImagePath)
 
   const newVideo = {
     title: 'Video 1',
-    videoUrl: 'https://www.youtube.com/watch?v=1',
-    coverImageUrl: 'https://www.youtube.com/watch?v=1',
-    choreographyId: coreographiesResponse.body.id
+    choreographyId: coreographiesResponse.body.id,
   }
 
   const videosResponse = await api
     .post('/videos')
     .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
-    .send(newVideo)
+    .field('title', newVideo.title)
+    .field('choreographyId', newVideo.choreographyId)
+    .field('folder', '/tests')
+    .attach('video', videoFile, { contentType: 'video/mp4', filename: 'test-video.mp4' })
+    .attach('coverImage', coverImageFile, { contentType: 'image/png', filename: 'test-cover.png' })
     .expect(201)
     .expect('Content-Type', /application\/json/)
 

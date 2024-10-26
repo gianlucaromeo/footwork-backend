@@ -11,7 +11,14 @@ const MYSQL_INFO = {
   port: process.env.MYSQL_PORT_DEV
 }
 
+const AWS_INFO = {
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+}
+
 module.exports = {
   PORT,
-  MYSQL_INFO
+  MYSQL_INFO,
+  AWS_INFO
 }

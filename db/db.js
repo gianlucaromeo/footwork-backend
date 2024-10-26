@@ -14,4 +14,10 @@ const sequelize = new Sequelize(
     logging: false
   })
 
-module.exports = { sequelize }
+// Initialize AWS
+const AWS = require('aws-sdk')
+
+AWS.config.update(config.AWS_INFO)
+const s3 = new AWS.S3()
+
+module.exports = { sequelize, s3 }

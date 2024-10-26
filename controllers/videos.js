@@ -1,5 +1,8 @@
 const videosRouter = require('express').Router()
 
+const { uploadFileToS3 } = require('../utils/s3Upload')
+const multer = require('multer')
+
 const Student = require('../models/student')
 const Admin = require('../models/admin')
 const Choreography = require('../models/choreography')
@@ -38,8 +41,10 @@ videosRouter.get('/admin/all', async (req, res) => {
   }
 })
 
-videosRouter.post('/', async (req, res) => {
-  //console.log('requested to create a video')
+const upload = multer({ storage: multer.memoryStorage() })
+
+videosRouter.post('/', upload.fields([{ name: 'coverImage' }, { name: 'video' }]),  async (req, res) => {
+
   const userId = req.userId
   const admin = await findAdmin(userId)
 
@@ -51,21 +56,44 @@ videosRouter.post('/', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  const video = req.body
+  const { title, choreographyId } = req.body
 
-  if (!video.title) {
+  if (!title) {
     return res.status(400).json({ error: 'Title is required' })
-  } else if (!video.choreographyId) {
+  } else if (!choreographyId) {
     return res.status(400).json({ error: 'Choreography ID is required' })
   }
 
-  // TODO Add read video and image
-  // TODO Generate real urls for images and video with AWS S3
-  video.videoUrl = 'https://www.youtube.com/watch?v=6JYIGclVQdw'
-  video.coverImageUrl = 'https://www.youtube.com/watch?v=6JYIGclVQdw'
+  // Use req.files because we are using upload.fields from multer
+  const coverImage = req.files['coverImage'][0]
+  const video = req.files['video'][0]
 
-  const newVideo = await Video.create(video)
-  return res.status(201).json(newVideo)
+  if (!coverImage) {
+    return res.status(400).json({ error: 'Cover image is required' })
+  } else if (!video) {
+    return res.status(400).json({ error: 'Video is required' })
+  }
+
+  try {
+    const folder = req.body.folder || '/tests'
+    const coverImageResponse = await uploadFileToS3(coverImage, folder)
+    const videoResponse = await uploadFileToS3(video, folder)
+
+    const coverImageUrl = coverImageResponse.Location
+    const videoUrl = videoResponse.Location
+
+    const newVideo = await Video.create({
+      title,
+      coverImageUrl,
+      videoUrl,
+      choreographyId
+    })
+
+    res.status(201).json(newVideo)
+  } catch (error) {
+    console.log('error uploading files', error)
+    return res.status(400).json({ error: 'Error uploading files' })
+  }
 })
 
 videosRouter.get('/student/all', async (req, res) => {
