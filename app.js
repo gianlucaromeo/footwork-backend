@@ -11,6 +11,7 @@ const coursesRouter = require('./controllers/courses')
 const enrollmentsRouter = require('./controllers/enrollments')
 const choreographiesRouter = require('./controllers/choreographies')
 const videosRouter = require('./controllers/videos')
+const emailsRouter = require('./controllers/emails')
 
 // Relationships
 const Student = require('./models/student')
@@ -74,6 +75,7 @@ app.use('/courses', coursesRouter)
 app.use('/enrollments', enrollmentsRouter)
 app.use('/choreographies', choreographiesRouter)
 app.use('/videos', videosRouter)
+app.use('/emails', emailsRouter)
 
 // Last middlewares setup
 app.use(middleware.unknownEndpoint)

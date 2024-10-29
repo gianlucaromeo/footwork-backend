@@ -1,10 +1,12 @@
 const studentsRouter = require('express').Router()
 const { isEmail } = require('validator')
+const { v4: uuidv4 } = require('uuid')
 const bcrypt = require('bcrypt')
 const Student = require('../models/student')
 const Admin = require('../models/admin')
 const Enrollment = require('../models/enrollment')
 const Course = require('../models/course')
+const { sendEmail } = require('../utils/emailSender')
 
 
 const findAdmin = async (id) => {
@@ -49,7 +51,6 @@ studentsRouter.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Email is not valid' })
   }
 
-
   const courses = req.body.courses
 
   if (courses) {
@@ -61,6 +62,10 @@ studentsRouter.post('/', async (req, res) => {
     }
   }
 
+  // TODO | Convert to transaction:
+  // create token > create student > create enrollments > send email
+  const registrationToken = uuidv4()
+  student.registrationToken = registrationToken
   const newStudent = await Student.create(student)
 
   for (const courseId of courses) {
@@ -69,6 +74,15 @@ studentsRouter.post('/', async (req, res) => {
       courseId: courseId,
     })
   }
+
+  // TODO | Change to production URL
+  const verifyEmailUrl = `http://localhost:3001/emails/verifyEmail/${registrationToken}`
+
+  sendEmail(
+    newStudent.email,
+    'Registration successful - Verify your email!',
+    `Hi ${newStudent.firstName}! Welcome to our dance school!\nClick here to verify your e-mail: ${verifyEmailUrl}`
+  )
 
   return res.status(201).json(newStudent)
 })

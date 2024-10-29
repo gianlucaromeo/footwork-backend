@@ -13,6 +13,7 @@ const { sequelize } = require('../db/db')
 // - created_at: Date, Not Null, Default Current Timestamp
 // - updated_at: Date, Null
 // - verified_by_admin: Boolean, Default False
+// - registration_token: String, Not Null
 const Student = sequelize.define('student', {
   firstName: {
     type: DataTypes.STRING,
@@ -43,6 +44,10 @@ const Student = sequelize.define('student', {
     allowNull: false,
     defaultValue: false
   },
+  registrationToken: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
 }, {
   tableName: 'students',
 })
@@ -50,6 +55,7 @@ const Student = sequelize.define('student', {
 Student.prototype.toJSON = function () {
   const values = Object.assign({}, this.get())
   delete values.passwordHash
+  delete values.registrationToken
   return values
 }
 
