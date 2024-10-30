@@ -33,6 +33,7 @@ erDiagram
         STRING last_name
         STRING email UK
         BOOL email_confirmed
+        STRING registration_token
         STRING password
         BOOL verified_by_admin
         TIMESTAMP created_at
