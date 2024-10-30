@@ -41,6 +41,13 @@ async function loginUser(roleModel, request, response) {
     })
   }
 
+  // Note: Both Admin and Student models have an emailConfirmed field
+  if (!user.emailConfirmed) {
+    return response.status(400).json({
+      error: 'Please confirm your email before logging in'
+    })
+  }
+
   const payload = {
     email: user.email,
     id: user.id,
