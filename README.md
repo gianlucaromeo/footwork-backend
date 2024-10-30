@@ -22,6 +22,7 @@ erDiagram
         STRING last_name
         STRING email UK
         BOOL email_confirmed
+        STRING registration_token
         STRING password
         TIMESTAMP created_at
         TIMESTAMP updated_at
