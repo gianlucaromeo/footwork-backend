@@ -7,17 +7,11 @@ const api = supertest(app)
 
 const { sequelize } = require('../db/db')
 const Admin = require('../models/admin')
-const helper = require('./tests_helper')
+const helper = require('./helper')
 
-let firstAdminLoggedIn = null
-let firstStudentLoggedIn = null
-let secondCourse = null
 
 beforeEach(async () => {
-  const users = await helper.initizliaseDatabase()
-  firstAdminLoggedIn = users.firstAdminLoggedIn
-  firstStudentLoggedIn = users.firstStudentLoggedIn
-  secondCourse = users.secondCourse
+  await helper.initializeDatabase()
 })
 
 after(() => {
@@ -28,14 +22,9 @@ describe('When there are initially some admins saved', async () => {
   test('a valid admin can login', async () => {
     const admin = helper.initialAdmins[0]
 
-    const loginData = {
-      email: admin.email,
-      password: admin.password
-    }
-
     const response = await api
       .post('/login/admin')
-      .send(loginData)
+      .send({ email: admin.email, password: admin.password })
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
@@ -45,13 +34,20 @@ describe('When there are initially some admins saved', async () => {
   })
 
   test('all admins are returned as json', async () => {
+    const firstAdmin = helper.initialAdmins[0]
+
+    const firstAdminLoggedInResponse = await api
+      .post('/login/admin')
+      .send({ email: firstAdmin.email, password: firstAdmin.password })
+      .expect(200)
+
     await api
       .get('/admins')
-      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedInResponse.body.token}`)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
-    const admins = await Admin.findAll()
+    const admins = await Admin.findAll({})
     assert.strictEqual(admins.length, helper.initialAdmins.length)
   })
 
@@ -72,9 +68,16 @@ describe('When there are initially some admins saved', async () => {
   })
 
   test('an admin can delete their own account', async () => {
+    const firstAdmin = helper.initialAdmins[0]
+
+    const firstAdminLoggedInResponse = await api
+      .post('/login/admin')
+      .send({ email: firstAdmin.email, password: firstAdmin.password })
+      .expect(200)
+
     await api
-      .delete(`/admins/${firstAdminLoggedIn.id}`)
-      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+      .delete(`/admins/${firstAdminLoggedInResponse.body.id}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedInResponse.body.token}`)
       .expect(204)
 
     const admins = await Admin.findAll()
@@ -82,9 +85,16 @@ describe('When there are initially some admins saved', async () => {
   })
 
   test('an admin cannot delete another admin account', async () => {
+    const firstAdmin = helper.initialAdmins[0]
+
+    const firstAdminLoggedInResponse = await api
+      .post('/login/admin')
+      .send({ email: firstAdmin.email, password: firstAdmin.password })
+      .expect(200)
+
     await api
-      .delete(`/admins/${helper.initialAdmins[1].id}`)
-      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+      .delete(`/admins/${firstAdminLoggedInResponse.body.id}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedInResponse.token}`)
       .expect(401)
 
     const admins = await Admin.findAll()
@@ -92,16 +102,30 @@ describe('When there are initially some admins saved', async () => {
   })
 
   test('an admin cannot delete an admin account without a token', async () => {
+    const firstAdmin = helper.initialAdmins[0]
+
+    const firstAdminLoggedInResponse = await api
+      .post('/login/admin')
+      .send({ email: firstAdmin.email, password: firstAdmin.password })
+      .expect(200)
+
     await api
-      .delete(`/admins/${helper.initialAdmins[0].id}`)
+      .delete(`/admins/${firstAdminLoggedInResponse.body.id}`)
       .expect(401)
   })
 
   test('an admin cannot delete an admin account with an invalid token', async () => {
+    const firstAdmin = helper.initialAdmins[0]
+
+    const firstAdminLoggedInResponse = await api
+      .post('/login/admin')
+      .send({ email: firstAdmin.email, password: firstAdmin.password })
+      .expect(200)
+
     const invalidToken = 'Bearer invalidtoken'
 
     await api
-      .delete(`/admins/${helper.initialAdmins[0].id}`)
+      .delete(`/admins/${firstAdminLoggedInResponse.body.id}`)
       .set('Authorization', invalidToken)
       .expect(401)
 
@@ -110,6 +134,13 @@ describe('When there are initially some admins saved', async () => {
   })
 
   test('an admin can update their own account', async () => {
+    const firstAdmin = helper.initialAdmins[0]
+
+    const firstAdminLoggedInResponse = await api
+      .post('/login/admin')
+      .send({ email: firstAdmin.email, password: firstAdmin.password })
+      .expect(200)
+
     const updatedAdmin = {
       firstName: 'Updated',
       lastName: 'Admin',
@@ -118,8 +149,8 @@ describe('When there are initially some admins saved', async () => {
     }
 
     await api
-      .put(`/admins/${firstAdminLoggedIn.id}`)
-      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+      .put(`/admins/${firstAdminLoggedInResponse.body.id}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedInResponse.body.token}`)
       .send(updatedAdmin)
       .expect(200)
 
@@ -129,15 +160,23 @@ describe('When there are initially some admins saved', async () => {
   })
 
   test('an admin can update the courses a student is enrolled in', async () => {
-    const studentId = firstStudentLoggedIn.id
+    const firstStudent = helper.initialStudents[0]
+    const secondCourse = helper.initialCourses[1]
 
     const updatedStudent = {
-      id: studentId,
+      id: firstStudent.id,
       courses: [secondCourse.id]
     }
 
-    await api.put(`/admins/student/${studentId}`)
-      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+    const firstAdmin = helper.initialAdmins[0]
+
+    const firstAdminLoggedInResponse = await api
+      .post('/login/admin')
+      .send({ email: firstAdmin.email, password: firstAdmin.password })
+      .expect(200)
+
+    await api.put(`/admins/student/${firstStudent.id}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedInResponse.body.token}`)
       .send(updatedStudent)
       .expect(200)
   })
