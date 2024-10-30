@@ -12,6 +12,7 @@ const { sequelize } = require('../db/db')
 // - password_hash: String, Not Null
 // - created_at: Date, Not Null, Default Current Timestamp
 // - updated_at: Date, Null
+// - registration_token: String, Not Null, Unique
 const Admin = sequelize.define('admin', {
   firstName: {
     type: DataTypes.STRING,
@@ -36,6 +37,10 @@ const Admin = sequelize.define('admin', {
   passwordHash: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  registrationToken: {
+    type: DataTypes.STRING,
+    allowNull: false
   }
 }, {
   tableName: 'admins',
@@ -44,6 +49,7 @@ const Admin = sequelize.define('admin', {
 Admin.prototype.toJSON = function () {
   const values = Object.assign({}, this.get())
   delete values.passwordHash
+  delete values.registrationToken
   return values
 }
 

@@ -1,10 +1,12 @@
 const adminsRouter = require('express').Router()
 const { isEmail } = require('validator')
+const { v4: uuidv4 } = require('uuid')
 const bcrypt = require('bcrypt')
 const Admin = require('../models/admin')
 const Student = require('../models/student')
 const Enrollment = require('../models/enrollment')
 const Course = require('../models/course')
+const { sendEmail } = require('../utils/emailSender')
 
 const findAdmin = async (id) => {
   return await Admin.findOne({ where: { id: id } })
@@ -39,7 +41,19 @@ adminsRouter.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Email is not valid' })
   }
 
+  const registrationToken = uuidv4()
+  admin.registrationToken = registrationToken
   const newAdmin = await Admin.create(admin)
+
+  // TODO | Change to production URL
+  const verifyEmailUrl = `http://localhost:3001/emails/verifyEmail/admin/${registrationToken}`
+
+  sendEmail(
+    newAdmin.email,
+    'Registration successful - Verify your email!',
+    `Hi ${newAdmin.firstName}! Click here to verify your e-mail: ${verifyEmailUrl}`
+  )
+
   return res.status(201).json(newAdmin)
 })
 
