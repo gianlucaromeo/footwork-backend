@@ -1,4 +1,6 @@
 const coursesRouter = require('express').Router()
+const { uploadFileToS3 } = require('../utils/s3Upload')
+const multer = require('multer')
 const Admin = require('../models/admin')
 const Student = require('../models/student')
 const Course = require('../models/course')
@@ -27,7 +29,9 @@ coursesRouter.get('/admin/all', async (req, res) => {
   return res.json(courses)
 })
 
-coursesRouter.post('/', async (req, res) => {
+const upload = multer({ storage: multer.memoryStorage() })
+
+coursesRouter.post('/', upload.single('coverImage'), async (req, res) => {
   const adminId = req.userId
   const admin = await findAdmin(adminId)
 
@@ -39,18 +43,34 @@ coursesRouter.post('/', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  // TODO Handle image upload
-
   const course = req.body
 
   if (!course.name) {
-    return res.status(400).json({ error: 'Name is required' })
-  } else if (!course.imageUrl) {
-    return res.status(400).json({ error: 'Image URL is required' })
+    return res.status(400).json({ error: 'Course name is required' })
   }
 
-  const newCourse = await Course.create(course)
-  return res.status(201).json(newCourse)
+  const coverImage = req.file
+  if (!coverImage) {
+    return res.status(400).json({ error: 'Cover image is required' })
+  }
+
+  try {
+    const folder = req.body.folder || '/all'
+    const coverImageRasponse = await uploadFileToS3(coverImage, folder)
+
+    course.imageUrl = coverImageRasponse.Location
+    delete course.coverImage
+
+    if (!course.imageUrl) {
+      return res.status(400).json({ error: 'Error uploading cover image' })
+    }
+
+    const newCourse = await Course.create(course)
+    return res.status(201).json(newCourse)
+  } catch (error) {
+    console.log('error uploading files', error)
+    return res.status(400).json({ error: 'Error uploading files' })
+  }
 })
 
 coursesRouter.get('/student/all', async (req, res) => {

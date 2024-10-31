@@ -75,7 +75,7 @@ videosRouter.post('/', upload.fields([{ name: 'coverImage' }, { name: 'video' }]
   }
 
   try {
-    const folder = req.body.folder || '/tests'
+    const folder = req.body.folder || '/all'
     const coverImageResponse = await uploadFileToS3(coverImage, folder)
     const videoResponse = await uploadFileToS3(video, folder)
 
