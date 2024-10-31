@@ -4,12 +4,6 @@ Footwork is a dance video management system for dance schools and associations.
 
 ![footwork-backend-stack](https://github.com/user-attachments/assets/e84c1ef9-292e-487c-b230-10a07ca5d492)
 
-## User Interface
-Footwork is an adaptive website, designed for large and small screens. Here's an example of an admin's dashboard.
-<br/>
-
-<img width="1800" alt="footwork-sample" src="https://github.com/user-attachments/assets/fb193522-fb59-4bf8-88d6-001b5d42f8e0">
-
 ## Database structure
 ```mermaid
 ---
