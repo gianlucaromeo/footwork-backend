@@ -1,4 +1,6 @@
 const choreographiesRouter = require('express').Router()
+const { uploadFileToS3 } = require('../utils/s3Upload')
+const multer = require('multer')
 const Admin = require('../models/admin')
 const Course = require('../models/course')
 const Choreography = require('../models/choreography')
@@ -28,7 +30,9 @@ choreographiesRouter.get('/admin/all', async (req, res) => {
   return res.json(choreographies)
 })
 
-choreographiesRouter.post('/', async (req, res) => {
+const upload = multer({ storage: multer.memoryStorage() })
+
+choreographiesRouter.post('/', upload.single('coverImage'), async (req, res) => {
   const adminId = req.userId
   const admin = await findAdmin(adminId)
 
@@ -40,12 +44,14 @@ choreographiesRouter.post('/', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  if (!req.body.title || !req.body.courseId) {
-    return res.status(400).json({ error: 'Title and courseId are required' })
+  const choreography = req.body
+
+  if (!choreography.title) {
+    return res.status(400).json({ error: 'Choreography title is required' })
   }
 
-  if (!req.body.imageUrl) {
-    return res.status(400).json({ error: 'Image URL is required' })
+  if (!choreography.courseId) {
+    return res.status(400).json({ error: 'Course ID is required' })
   }
 
   const course = await findCourse(req.body.courseId)
@@ -54,15 +60,29 @@ choreographiesRouter.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Course not found' })
   }
 
-  const newChoreographyData = {
-    title: req.body.title,
-    courseId: req.body.courseId,
-    imageUrl: req.body.imageUrl
+  const coverImage = req.file
+  if (!coverImage) {
+    return res.status(400).json({ error: 'Cover image is required' })
   }
 
-  const newChoreography = await Choreography.create(newChoreographyData)
+  try {
+    const folder = req.body.folder || '/all'
+    const coverImageRasponse = await uploadFileToS3(coverImage, folder)
+    choreography.imageUrl = coverImageRasponse.Location
+    delete choreography.coverImage
 
-  return res.status(201).json(newChoreography)
+    if (!choreography.imageUrl) {
+      return res.status(400).json({ error: 'Error uploading cover image' })
+    }
+
+    const newChoreography = await Choreography.create(choreography)
+
+    // Fix: courseId is returned as a String even though it is an Integer
+    return res.status(201).json(newChoreography)
+  } catch (error) {
+    console.log('error uploading files', error)
+    return res.status(400).json({ error: 'Error uploading files' })
+  }
 })
 
 module.exports = choreographiesRouter

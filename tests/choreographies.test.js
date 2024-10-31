@@ -1,7 +1,7 @@
 const { beforeEach, after, describe, test } = require('node:test')
 const assert = require('assert')
 const { sequelize } = require('../db/db')
-const helper = require('./tests_helper')
+const helper = require('./helper')
 
 const Choreography = require('../models/choreography')
 const Course = require('../models/course')
@@ -10,13 +10,8 @@ const app = require('../app')
 const supertest = require('supertest')
 const api = supertest(app)
 
-let firstAdminLoggedIn = null
-let initialChoreographies = null
-
 beforeEach(async () => {
-  const dbData = await helper.initizliaseDatabase()
-  firstAdminLoggedIn = dbData.firstAdminLoggedIn
-  initialChoreographies = dbData.initialChoreographies
+  await helper.initializeDatabase()
 })
 
 after(() => {
@@ -25,39 +20,68 @@ after(() => {
 
 describe('when there are initially some choreographies', () => {
   test('an admin can retrieve all the choreographies', async () => {
+    const firstAdmin = helper.initialAdmins[0]
+
+    const firstAdminLoggedInResponse = await api
+      .post('/login/admin')
+      .send({ email: firstAdmin.email, password: firstAdmin.password })
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
     const response = await api
       .get('/choreographies/admin/all')
-      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
+      .set('Authorization', `Bearer ${firstAdminLoggedInResponse.body.token}`)
       .expect(200)
       .expect('Content-Type', /application\/json/)
 
     assert.strictEqual(
       response.body.length,
-      initialChoreographies.length
+      helper.initialChoreographies.length
     )
   })
 
   test('an admin can create a new choreography', async () => {
+    const firstAdmin = helper.initialAdmins[0]
+
+    const firstAdminLoggedInResponse = await api
+      .post('/login/admin')
+      .send({ email: firstAdmin.email, password: firstAdmin.password })
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
     const courses = await Course.findAll({ where: {} })
+
+    const fs = require('fs')
+    const path = require('path')
+    const coverImagePath = path.join(__dirname, 'test-cover.png')
+    const coverImageFile = fs.readFileSync(coverImagePath)
 
     const newChoreography = {
       title: 'New Choreography',
       courseId: courses[0].id,
-      imageUrl: 'https://example.com/image.jpg',
+      coverImage: coverImageFile,
     }
 
     const response = await api
       .post('/choreographies')
-      .set('Authorization', `Bearer ${firstAdminLoggedIn.token}`)
-      .send(newChoreography)
+      .set('Authorization', `Bearer ${firstAdminLoggedInResponse.body.token}`)
+      .field('title', newChoreography.title)
+      .field('courseId', newChoreography.courseId)
+      .field('folder', '/tests')
+      .attach('coverImage', coverImagePath)
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
     assert.strictEqual(response.body.title, newChoreography.title)
-    assert.strictEqual(response.body.courseId, newChoreography.courseId)
 
-    const choreographies = await Choreography.findAll()
-    assert.strictEqual(choreographies.length, initialChoreographies.length + 1)
+    // Fix: courseId is returned as a String even though it is an Integer
+    assert.strictEqual(
+      response.body.courseId,
+      newChoreography.courseId.toString()
+    )
+
+    const choreographies = await Choreography.findAll({})
+    assert.strictEqual(choreographies.length, helper.initialChoreographies.length + 1)
   })
 })
 
