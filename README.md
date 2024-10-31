@@ -2,6 +2,10 @@
 Footwork is a dance video management system for dance schools and associations.
 <br/>
 
+[Check the front-end](https://github.com/gianlucaromeo/footwork-frontend/tree/main)
+<br/>
+
+## Tech Stack
 ![footwork-backend-stack](https://github.com/user-attachments/assets/e84c1ef9-292e-487c-b230-10a07ca5d492)
 
 ## Database structure
@@ -75,3 +79,6 @@ erDiagram
     STUDENT ||--o{ ENROLLMENT : enrolls_in
     COURSE ||--o{ ENROLLMENT : contains
 ```
+
+## Notes
+More details and images will be uploaded before 29 November! 👀
