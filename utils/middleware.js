@@ -63,11 +63,34 @@ const userRoleExtractor = (request, response, next) => {
   next()
 }
 
+const tokenExpirationChecker = (request, response, next) => {
+  if (request.token) {
+    try {
+      const decodedToken = jwt.decode(request.token)
+      if (decodedToken && decodedToken.exp) {
+        const expirationTime = decodedToken.exp
+        const currentTime = Math.floor(Date.now() / 1000)
+        if (currentTime > expirationTime) {
+          return response.status(401).json({ error: 'Token expired' })
+        }
+      } else {
+        return response.status(401).json({ error: 'Invalid token' })
+      }
+    // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      return response.status(401).json({ error: 'Error' })
+    }
+  }
+
+  next()
+}
+
 module.exports = {
   requestLogger,
   unknownEndpoint,
   errorHandler,
   tokenExtractor,
   userIdExtractor,
-  userRoleExtractor
+  userRoleExtractor,
+  tokenExpirationChecker
 }

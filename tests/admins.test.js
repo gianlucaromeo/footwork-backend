@@ -67,6 +67,26 @@ describe('When there are initially some admins saved', async () => {
       .expect('Content-Type', /application\/json/)
   })
 
+  test('admins cannot be retrieved with an expired token', async () => {
+    const jwt = require('jsonwebtoken')
+    const firstAdmin = helper.initialAdmins[0]
+
+    const expiredToken = jwt.sign(
+      { email: firstAdmin.email, id: firstAdmin.id, role: 'admin' },
+      process.env.SECRET,
+      { expiresIn: '1' }
+    )
+
+    await new Promise(resolve => setTimeout(resolve, 1400))
+
+    await api
+      .get('/admins')
+      .set('Authorization', `Bearer ${expiredToken}`)
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
+      .expect({ error: 'Token expired' })
+  })
+
   test('an admin can delete their own account', async () => {
     const firstAdmin = helper.initialAdmins[0]
 
