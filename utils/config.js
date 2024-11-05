@@ -7,7 +7,10 @@ const MYSQL_INFO = {
   host: process.env.MYSQL_HOST_DEV,
   user: process.env.MYSQL_USER_DEV,
   password: process.env.MYSQL_PASSWORD_DEV,
-  database: process.env.MYSQL_DATABASE_DEV,
+  // TODO: Add production option
+  database: process.env.NODE_ENV === 'development'
+    ? process.env.MYSQL_DATABASE_DEV
+    : process.env.MYSQL_DATABASE_TEST,
   port: process.env.MYSQL_PORT_DEV
 }
 
