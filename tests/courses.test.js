@@ -83,4 +83,13 @@ describe('When there are initially some courses saved', async () => {
       .expect(401)
       .expect('Content-Type', /application\/json/)
   })
+
+  test('All courses can be fetched without token', async () => {
+    const response = await api
+      .get('/courses/all')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    assert.strictEqual(response.body.length, helper.initialCourses.length)
+  })
 })

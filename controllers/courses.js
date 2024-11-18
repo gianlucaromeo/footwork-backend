@@ -13,18 +13,7 @@ const findStudent = async (id) => {
   return await Student.findOne({ where: { id: id } })
 }
 
-coursesRouter.get('/admin/all', async (req, res) => {
-  const adminId = req.userId
-  const admin = await findAdmin(adminId)
-
-  if (!admin) {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
-
-  if (req.userRole !== 'admin') {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
-
+coursesRouter.get('/all', async (req, res) => {
   const courses = await Course.findAll()
   return res.json(courses)
 })
