@@ -47,7 +47,13 @@ Video.belongsTo(Choreography, {
 })
 
 // First middlewares setup
-app.use(cors())
+// Allow requests from http://localhost:5173 till frontend is deployed
+const corsOptions = {
+  origin: 'http://localhost:5173', // Replace with frontend URL in production
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true, // If using cookies or authentication headers
+}
+app.use(cors(corsOptions))
 app.use(express.static('dist'))
 app.use(express.json())
 app.use(middleware.tokenExtractor)
