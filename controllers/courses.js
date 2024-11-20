@@ -74,11 +74,14 @@ coursesRouter.get('/student/all', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
+  // Query only the course data
   const courses = await Course.findAll({
+    attributes: ['id', 'name', 'imageUrl'], // Specify only the required fields
     include: {
       model: Student,
       where: { id: studentId },
-    }
+      attributes: [], // Exclude student fields
+    },
   })
 
   return res.json(courses)

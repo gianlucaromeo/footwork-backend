@@ -2,8 +2,11 @@ POST http://localhost:3001/students
 Content-Type: application/json
 
 {
-    "firstName": "Student 1",
-    "lastName": "Last Name 1",
-    "email": "student1@1.com",
-    "password": "Password1"
+    "student": {
+        "firstName": "Student 12",
+        "lastName": "Last Name 12",
+        "email": "student12@1.com",
+        "password": "Password12?"
+    },
+    "courses": [1, 2]
 }
