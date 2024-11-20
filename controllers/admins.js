@@ -1,3 +1,4 @@
+require('dotenv').config()
 const adminsRouter = require('express').Router()
 const { isEmail } = require('validator')
 const { v4: uuidv4 } = require('uuid')
@@ -45,8 +46,7 @@ adminsRouter.post('/', async (req, res) => {
   admin.registrationToken = registrationToken
   const newAdmin = await Admin.create(admin)
 
-  // TODO | Change to production URL
-  const verifyEmailUrl = `http://localhost:3001/emails/verifyEmail/admin/${registrationToken}`
+  const verifyEmailUrl = `${process.env.BACKEND_BASE_URL}/${registrationToken}`
 
   sendEmail(
     newAdmin.email,

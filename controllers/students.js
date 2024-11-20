@@ -1,3 +1,4 @@
+require('dotenv').config()
 const studentsRouter = require('express').Router()
 const { isEmail } = require('validator')
 const { v4: uuidv4 } = require('uuid')
@@ -75,8 +76,7 @@ studentsRouter.post('/', async (req, res) => {
     })
   }
 
-  // TODO | Change to production URL
-  const verifyEmailUrl = `http://localhost:3001/emails/verifyEmail/${registrationToken}`
+  const verifyEmailUrl = `${process.env.BACKEND_BASE_URL}/${registrationToken}`
 
   sendEmail(
     newStudent.email,
