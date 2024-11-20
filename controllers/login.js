@@ -52,14 +52,19 @@ async function loginUser(roleModel, request, response) {
     email: user.email,
     id: user.id,
     role: roleModel.name.toLowerCase(),
-    firstName: user.firstName,
   }
 
   const token = createToken(payload)
 
   response
     .status(200)
-    .send({ token, email: user.email, id: user.id })
+    .send({
+      token,
+      email: user.email,
+      role: roleModel.name.toLowerCase(),
+      id: user.id,
+      firstName: user.firstName
+    })
 }
 
 // Admin login
