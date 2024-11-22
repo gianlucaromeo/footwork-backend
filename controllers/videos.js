@@ -120,7 +120,7 @@ videosRouter.get('/student/all', async (req, res) => {
       include: {
         model: Choreography,
         where: { courseId: coursesIds },
-        attributes: []
+        attributes: [ 'id', 'title', 'courseId', 'imageUrl' ]
       }
     })
     res.status(200).json(videos)
