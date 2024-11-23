@@ -32,7 +32,12 @@ videosRouter.get('/admin/all', async (req, res) => {
 
   //console.log('getting all videos')
   try {
-    const videos = await Video.findAll()
+    const videos = await Video.findAll({
+      include: {
+        model: Choreography,
+        attributes: [ 'id', 'title', 'courseId', 'imageUrl' ]
+      }
+    })
     //console.log('videos', videos)
     res.status(200).json(videos)
   } catch (error) {
