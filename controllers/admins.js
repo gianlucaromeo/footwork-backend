@@ -46,7 +46,7 @@ adminsRouter.post('/', async (req, res) => {
   admin.registrationToken = registrationToken
   const newAdmin = await Admin.create(admin)
 
-  const verifyEmailUrl = `${process.env.BACKEND_BASE_URL}/${registrationToken}`
+  const verifyEmailUrl = `${process.env.BACKEND_BASE_URL}/emails/${registrationToken}`
 
   sendEmail(
     newAdmin.email,
