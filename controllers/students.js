@@ -76,7 +76,7 @@ studentsRouter.post('/', async (req, res) => {
     })
   }
 
-  const verifyEmailUrl = `${process.env.BACKEND_BASE_URL}/emails/${registrationToken}`
+  const verifyEmailUrl = `${process.env.BACKEND_BASE_URL}/emails/verifyEmail/${registrationToken}`
 
   sendEmail(
     newStudent.email,
