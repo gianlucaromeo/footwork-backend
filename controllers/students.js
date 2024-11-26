@@ -34,6 +34,17 @@ studentsRouter.get('/', async (req, res) => {
   res.status(200).json(students)
 })
 
+studentsRouter.get('/profile', async (req, res) => {
+  const studentId = req.userId
+  const student = await findStudent(studentId)
+
+  if (!student) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  return res.status(200).json(student)
+})
+
 studentsRouter.post('/', async (req, res) => {
   const student = req.body.student
 
