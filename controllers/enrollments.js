@@ -75,4 +75,41 @@ enrollmentsRouter.post('/', async (req, res) => {
   return res.status(201).json(enrollment)
 })
 
+enrollmentsRouter.delete('/', async (req, res) => {
+  const adminId = req.userId
+  const admin = await findAdmin(adminId)
+
+  if (!admin) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (req.userRole !== 'admin') {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const studentId = req.body.studentId
+  const courseId = req.body.courseId
+
+  if (!studentId || !courseId) {
+    return res.status(400).json({ error:
+      'Both studentId and courseId are required'
+    })
+  }
+
+  const enrollment = await Enrollment.findOne({ where: {
+    studentId: studentId,
+    courseId: courseId,
+  } })
+
+  if (!enrollment) {
+    return res.status(400).json({ error: 'Enrollment not found' })
+  }
+
+  await Enrollment.destroy({ where: {
+    studentId: studentId,
+    courseId: courseId,
+  } })
+  return res.status(204).end()
+})
+
 module.exports = enrollmentsRouter

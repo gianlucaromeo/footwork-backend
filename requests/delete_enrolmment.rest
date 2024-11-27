@@ -1,0 +1,8 @@
+DELETE http://localhost:3001/enrollments/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsImlkIjo1NjE1LCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MzI3NDE3NDUsImV4cCI6MTczMjkxNDU0NX0.PgGjLPRaFvR7WGV6GkBOJiJcnXetVp9OfPqlNYGQIlA
+Content-Type: application/json
+
+{
+    "studentId": 1,
+    "courseId": 1
+}
