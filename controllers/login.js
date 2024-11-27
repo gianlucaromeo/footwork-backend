@@ -56,6 +56,7 @@ async function loginUser(roleModel, request, response) {
 
   const token = createToken(payload)
 
+  // If is student, send property "verifiedByAdmin"
   response
     .status(200)
     .send({
@@ -63,7 +64,11 @@ async function loginUser(roleModel, request, response) {
       email: user.email,
       role: roleModel.name.toLowerCase(),
       id: user.id,
-      firstName: user.firstName
+      firstName: user.firstName,
+      ...(
+        roleModel.name.toLowerCase() === 'student' &&
+        { verifiedByAdmin: user.verifiedByAdmin }
+      )
     })
 }
 
