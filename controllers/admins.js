@@ -24,6 +24,17 @@ adminsRouter.get('/', async (req, res) => {
   res.status(200).json(admins)
 })
 
+adminsRouter.get('/profile', async (req, res) => {
+  const userId = req.userId
+  const admin = await findAdmin(userId)
+
+  if (!admin) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  return res.status(200).json(admin)
+})
+
 adminsRouter.post('/', async (req, res) => {
   const admin = req.body
 
