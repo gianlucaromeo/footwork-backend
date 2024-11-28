@@ -68,20 +68,15 @@ adminsRouter.post('/', async (req, res) => {
   return res.status(201).json(newAdmin)
 })
 
-adminsRouter.delete('/:id', async (req, res) => {
+adminsRouter.delete('/', async (req, res) => {
   const userId = req.userId
   const admin = await findAdmin(userId)
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  const id = req.params.id
+  const deleted = await Admin.destroy({ where: { id: userId } })
 
-  if (!(id.toString() === userId.toString())) {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
-
-  const deleted = await Admin.destroy({ where: { id: id } })
   if (deleted) {
     return res.status(204).end()
   } else {
