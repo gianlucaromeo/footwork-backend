@@ -169,8 +169,7 @@ adminsRouter.put('/student/verify/:id', async (req, res) => {
   sendEmail(
     student.email,
     'Account verified',
-    `Hi ${student.firstName}! Your account has been verified by an admin
-    and you can now use Footwork. Login at ${websiteUrl}!`
+    `Hi ${student.firstName}! Your account has been verified by an admin and you can now use Footwork. Login at ${websiteUrl} !`
   )
 
   return res.status(200).end()
