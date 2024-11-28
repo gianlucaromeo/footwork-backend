@@ -47,12 +47,23 @@ Video.belongsTo(Choreography, {
 })
 
 // First middlewares setup
-// Allow requests from http://localhost:5173 till frontend is deployed
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://footwork-frontend.onrender.com'
+]
+
 const corsOptions = {
-  origin: 'http://localhost:5173', // Replace with frontend URL in production
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true, // If using cookies or authentication headers
 }
+
 app.use(cors(corsOptions))
 app.use(express.static('dist'))
 app.use(express.json())
