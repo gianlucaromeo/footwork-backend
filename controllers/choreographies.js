@@ -85,4 +85,49 @@ choreographiesRouter.post('/', upload.single('coverImage'), async (req, res) => 
   }
 })
 
+choreographiesRouter.put(
+  '/:id',
+  upload.single('coverImage'),
+  async (req, res) => {
+    const adminId = req.userId
+    const admin = await findAdmin(adminId)
+
+    if (!admin) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    if (req.userRole !== 'admin') {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    const choreography = await Choreography.findOne({
+      where: { id: req.params.id },
+    })
+
+    if (!choreography) {
+      return res.status(400).json({ error: 'Choreography not found' })
+    }
+
+    const newChoreography = req.body
+
+    if (req.file) {
+      const coverImage = req.file
+      const folder = req.body.folder || '/all'
+      const coverImageRasponse = await uploadFileToS3(coverImage, folder)
+      delete newChoreography.coverImage
+      newChoreography.imageUrl = coverImageRasponse.Location
+
+      if (!newChoreography.imageUrl) {
+        return res.status(400).json({ error: 'Error uploading cover image' })
+      }
+    }
+
+    await Choreography.update(newChoreography, {
+      where: { id: req.params.id },
+    })
+
+    return res.status(200).end()
+  }
+)
+
 module.exports = choreographiesRouter
