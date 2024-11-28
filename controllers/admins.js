@@ -75,6 +75,10 @@ adminsRouter.delete('/', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
+  if (req.userRole !== 'admin') {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
   const deleted = await Admin.destroy({ where: { id: userId } })
 
   if (deleted) {

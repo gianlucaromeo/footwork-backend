@@ -98,7 +98,7 @@ studentsRouter.post('/', async (req, res) => {
   return res.status(201).json(newStudent)
 })
 
-studentsRouter.delete('/:id', async (req, res) => {
+studentsRouter.delete('/', async (req, res) => {
   const studentId = req.userId
   const student = await findStudent(studentId)
 
@@ -106,16 +106,17 @@ studentsRouter.delete('/:id', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  if (student.id.toString() !== req.params.id.toString()) {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
-
   if (req.userRole !== 'student') {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  await Student.destroy({ where: { id: req.params.id } })
-  return res.status(204).end()
+  const deleted = await Student.destroy({ where: { id: studentId } })
+
+  if (deleted) {
+    return res.status(204).end()
+  } else {
+    return res.status(404).json({ error: 'Student not found' })
+  }
 })
 
 studentsRouter.put('/:id', async (req, res) => {
