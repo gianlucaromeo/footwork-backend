@@ -87,4 +87,50 @@ coursesRouter.get('/student/all', async (req, res) => {
   return res.json(courses)
 })
 
+coursesRouter.put('/', upload.single('coverImage'), async (req, res) => {
+  const adminId = req.userId
+  const admin = await findAdmin(adminId)
+
+  if (!admin) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (req.userRole !== 'admin') {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const course = req.body
+
+  if (!course.id) {
+    return res.status(400).json({ error: 'Course id is required' })
+  }
+
+  const existingCourse = await Course.findOne({ where: { id: course.id } })
+
+  if (!existingCourse) {
+    return res.status(400).json({ error: 'Course not found' })
+  }
+
+  const coverImage = req.file
+  if (coverImage) {
+    try {
+      const folder = req.body.folder || '/all'
+      const coverImageRasponse = await uploadFileToS3(coverImage, folder)
+
+      course.imageUrl = coverImageRasponse.Location
+      delete course.coverImage
+
+      if (!course.imageUrl) {
+        return res.status(400).json({ error: 'Error uploading cover image' })
+      }
+    } catch (error) {
+      console.log('error uploading files', error)
+      return res.status(400).json({ error: 'Error uploading files' })
+    }
+  }
+
+  await Course.update(course, { where: { id: course.id } })
+  return res.status(200).end()
+})
+
 module.exports = coursesRouter
