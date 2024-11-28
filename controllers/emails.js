@@ -20,7 +20,7 @@ emailsRouter.get('/verifyEmail/:registrationToken', async (req, res) => {
   student.emailConfirmed = true
   await student.save()
 
-  const websiteUrl = `${process.env.FRONTEND_BASE_URL}/login`
+  const websiteUrl = `${process.env.FRONTEND_BASE_URL}/`
 
   sendEmail(
     student.email,
@@ -46,7 +46,7 @@ emailsRouter.get('/verifyEmail/admin/:registrationToken', async (req, res) => {
   admin.emailConfirmed = true
   await admin.save()
 
-  const websiteUrl = `${process.env.FRONTEND_BASE_URL}/login`
+  const websiteUrl = `${process.env.FRONTEND_BASE_URL}/`
 
   sendEmail(
     admin.email,
