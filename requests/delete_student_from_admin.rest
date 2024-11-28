@@ -1,0 +1,2 @@
+DELETE http://localhost:3001/admins/student/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsImlkIjo1NjE1LCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MzI3OTE2MzIsImV4cCI6MTczMjk2NDQzMn0.q_NldImscn6WAsy_kAPwxrsDebX0EFedMDRqa_4PZlM

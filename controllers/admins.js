@@ -166,4 +166,27 @@ adminsRouter.put('/student/verify/:id', async (req, res) => {
   return res.status(200).end()
 })
 
+adminsRouter.delete('/student/:id', async (req, res) => {
+  const adminId = req.userId
+  const admin = await findAdmin(adminId)
+
+  if (!admin) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (req.userRole !== 'admin') {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const student = await Student.findOne({ where: { id: req.params.id } })
+  if (!student) {
+    return res.status(400).json({ error: 'Student not found' })
+  }
+
+  await Enrollment.destroy({ where: { studentId: student.id } })
+  await Student.destroy({ where: { id: student.id } })
+
+  return res.status(204).end()
+})
+
 module.exports = adminsRouter
