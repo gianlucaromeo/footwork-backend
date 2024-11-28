@@ -135,4 +135,29 @@ videosRouter.get('/student/all', async (req, res) => {
   }
 })
 
+videosRouter.delete('/:id', async (req, res) => {
+  const userId = req.userId
+  const admin = await findAdmin(userId)
+
+  if (!admin) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (req.userRole !== 'admin') {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  const videoId = req.params.id
+
+  const video = await Video.findOne({ where: { id: videoId } })
+
+  if (!video) {
+    return res.status(404).json({ error: 'Video not found' })
+  }
+
+  await video.destroy()
+
+  return res.status(204).end()
+})
+
 module.exports = videosRouter
