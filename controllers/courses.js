@@ -87,7 +87,7 @@ coursesRouter.get('/student/all', async (req, res) => {
   return res.json(courses)
 })
 
-coursesRouter.put('/', upload.single('coverImage'), async (req, res) => {
+coursesRouter.put('/:id', upload.single('coverImage'), async (req, res) => {
   const adminId = req.userId
   const admin = await findAdmin(adminId)
 
@@ -99,37 +99,28 @@ coursesRouter.put('/', upload.single('coverImage'), async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' })
   }
 
-  const course = req.body
-
-  if (!course.id) {
-    return res.status(400).json({ error: 'Course id is required' })
-  }
-
-  const existingCourse = await Course.findOne({ where: { id: course.id } })
-
-  if (!existingCourse) {
+  const course = await Course.findOne({ where: { id: req.params.id } })
+  if (!course) {
     return res.status(400).json({ error: 'Course not found' })
   }
 
-  const coverImage = req.file
-  if (coverImage) {
-    try {
-      const folder = req.body.folder || '/all'
-      const coverImageRasponse = await uploadFileToS3(coverImage, folder)
+  const newCourse = req.body
 
-      course.imageUrl = coverImageRasponse.Location
-      delete course.coverImage
+  if (req.file) {
+    const coverImage = req.file
+    const folder = req.body.folder || '/all'
+    const coverImageRasponse = await uploadFileToS3(coverImage, folder)
 
-      if (!course.imageUrl) {
-        return res.status(400).json({ error: 'Error uploading cover image' })
-      }
-    } catch (error) {
-      console.log('error uploading files', error)
-      return res.status(400).json({ error: 'Error uploading files' })
+    delete newCourse.coverImage
+
+    newCourse.imageUrl = coverImageRasponse.Location
+
+    if (!newCourse.imageUrl) {
+      return res.status(400).json({ error: 'Error uploading cover image' })
     }
   }
 
-  await Course.update(course, { where: { id: course.id } })
+  await Course.update(newCourse, { where: { id: req.params.id } })
   return res.status(200).end()
 })
 
