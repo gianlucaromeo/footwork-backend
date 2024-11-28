@@ -1,0 +1,2 @@
+PUT http://localhost:3001/admins/student/verify/5154
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsImlkIjo1NjE1LCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MzI3ODcyNTgsImV4cCI6MTczMjk2MDA1OH0.EFBY0gvrRl5QpRMZH7SSBViuX3v8jh_bg4BVw4zWAI4
