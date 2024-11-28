@@ -20,15 +20,15 @@ emailsRouter.get('/verifyEmail/:registrationToken', async (req, res) => {
   student.emailConfirmed = true
   await student.save()
 
-  const loginUrl = `${process.env.BACKEND_BASE_URL}/login`
+  const websiteUrl = `${process.env.FRONTEND_BASE_URL}/login`
 
   sendEmail(
     student.email,
     'All Set! Welcome to our dance school!',
-    `Hi ${student.firstName}! Your email has been successfully confirmed. You can now log in at ${loginUrl} and browse videos for your courses!`
+    `Hi ${student.firstName}! Your email has been successfully confirmed. You can now log in at ${websiteUrl} and browse videos for your courses!`
   )
 
-  res.status(200).json(student)
+  res.redirect(websiteUrl)
 })
 
 emailsRouter.get('/verifyEmail/admin/:registrationToken', async (req, res) => {
@@ -46,8 +46,7 @@ emailsRouter.get('/verifyEmail/admin/:registrationToken', async (req, res) => {
   admin.emailConfirmed = true
   await admin.save()
 
-  // TODO | Change with the actual website URL
-  const websiteUrl = 'http:localhost:3001/login'
+  const websiteUrl = `${process.env.FRONTEND_BASE_URL}/login`
 
   sendEmail(
     admin.email,
@@ -55,7 +54,7 @@ emailsRouter.get('/verifyEmail/admin/:registrationToken', async (req, res) => {
     `Hi ${admin.firstName}! Your email has been successfully confirmed. You can now log in at ${websiteUrl} and manage courses!`
   )
 
-  res.status(200).json(admin)
+  res.redirect(websiteUrl)
 })
 
 module.exports = emailsRouter
