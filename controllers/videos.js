@@ -140,11 +140,11 @@ videosRouter.delete('/:id', async (req, res) => {
   const admin = await findAdmin(userId)
 
   if (!admin) {
-    return res.status(401).json({ error: 'Unauthorized' })
+    return res.status(401).json({ error: 'Unauthorized - Admin not found' })
   }
 
   if (req.userRole !== 'admin') {
-    return res.status(401).json({ error: 'Unauthorized' })
+    return res.status(401).json({ error: 'Unauthorized - Not an admin' })
   }
 
   const videoId = req.params.id
