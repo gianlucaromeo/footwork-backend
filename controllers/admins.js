@@ -163,6 +163,16 @@ adminsRouter.put('/student/verify/:id', async (req, res) => {
   }
 
   await Student.update({ verifiedByAdmin: true }, { where: { id: student.id } })
+
+  const websiteUrl = process.env.FRONTEND_BASE_URL
+
+  sendEmail(
+    student.email,
+    'Account verified',
+    `Hi ${student.firstName}! Your account has been verified by an admin
+    and you can now use Footwork. Login at ${websiteUrl}!`
+  )
+
   return res.status(200).end()
 })
 
