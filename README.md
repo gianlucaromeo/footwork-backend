@@ -21,7 +21,7 @@ erDiagram
         STRING email UK
         BOOL email_confirmed
         STRING registration_token
-        STRING password
+        STRING password_hash
         TIMESTAMP created_at
         TIMESTAMP updated_at
     }
@@ -33,7 +33,7 @@ erDiagram
         STRING email UK
         BOOL email_confirmed
         STRING registration_token
-        STRING password
+        STRING password_hash
         BOOL verified_by_admin
         TIMESTAMP created_at
         TIMESTAMP updated_at
@@ -58,9 +58,9 @@ erDiagram
 
     VIDEO {
         BIG_INT id PK
+        STRING title
         STRING cover_image_url
         STRING video_url
-        STRING title
         BIG_INT choreography_id FK
         TIMESTAMP created_at
         TIMESTAMP updated_at
