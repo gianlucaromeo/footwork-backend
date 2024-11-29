@@ -4,7 +4,7 @@ const multer = require('multer')
 const Admin = require('../models/admin')
 const Course = require('../models/course')
 const Choreography = require('../models/choreography')
-
+const Video = require('../models/video')
 
 const findAdmin = async (id) => {
   return await Admin.findOne({ where: { id: id } })
@@ -129,5 +129,32 @@ choreographiesRouter.put(
     return res.status(200).end()
   }
 )
+
+
+choreographiesRouter.delete('/:id', async (req, res) => {
+  const adminId = req.userId
+  const admin = await findAdmin(adminId)
+
+  if (!admin) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (req.userRole !== 'admin') {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  await Video.destroy({ where: { choreographyId: req.params.id } })
+
+  const choreography = await Choreography.findOne({
+    where: { id: req.params.id },
+  })
+
+  if (!choreography) {
+    return res.status(400).json({ error: 'Choreography not found' })
+  }
+
+  await Choreography.destroy({ where: { id: req.params.id } })
+  return res.status(204).end()
+})
 
 module.exports = choreographiesRouter
