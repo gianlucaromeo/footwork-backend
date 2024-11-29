@@ -1,12 +1,45 @@
 # Footwork - Backend
-Footwork is a dance video management system for dance schools and associations.
+Footwork is a dance video management system aimed at helping dance schools and associations organize their video content and student enrollments. This repository contains the backend code, built with Node.js and Express.
 <br/>
 
 [Check the front-end](https://github.com/gianlucaromeo/footwork-frontend/tree/main)
 <br/>
 
 ## Tech Stack
+
+- Runtime: Node.js
+- Framework: Express.js
+- Database: MySQL (via Sequelize ORM), AWS RDS
+- Storage: AWS S3 (for videos and images)
+- Authentication: JSON Web Tokens (JWT) and bcrypt
+- Linting: eslint
+- Environment Management: dotenv
+- Documentation: .md and mermaid
+<br/>
+
 ![footwork-backend-stack](https://github.com/user-attachments/assets/e84c1ef9-292e-487c-b230-10a07ca5d492)
+
+## Key Features
+
+### General
+- RESTful API to manage users, courses, choreographies, and videos.
+- Role-based access control (Admin vs. Student).
+- JWT-based authentication and secure password hashing (bcrypt).
+
+### For Students
+- Registration and account management.
+- Access only to enrolled courses and their videos.
+
+### For Teachers (Admins)
+- Manage students, courses, and videos.
+- Upload dance videos and organize content by choreographies.
+
+## Deployment
+The backend is deployed on Render, and the production database is hosted on AWS RDS.
+
+## Known Issues
+- Delayed initial response: Due to Render's free plan, the backend instance may take up to 50 seconds to respond after inactivity.
+- Limited scalability: Video uploads rely on AWS S3, but optimization for large-scale usage is not yet implemented.
 
 ## Database structure
 ```mermaid
@@ -115,5 +148,5 @@ erDiagram
     └── s3Upload.js
 ```
 
-## Notes
-More details and images will be uploaded before 29 November! 👀
+## License
+This project is licensed under the MIT License.
