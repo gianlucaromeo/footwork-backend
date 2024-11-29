@@ -4,6 +4,8 @@ const multer = require('multer')
 const Admin = require('../models/admin')
 const Student = require('../models/student')
 const Course = require('../models/course')
+const Video = require('../models/video')
+const Choreography = require('../models/choreography')
 
 const findAdmin = async (id) => {
   return await Admin.findOne({ where: { id: id } })
@@ -122,6 +124,41 @@ coursesRouter.put('/:id', upload.single('coverImage'), async (req, res) => {
 
   await Course.update(newCourse, { where: { id: req.params.id } })
   return res.status(200).end()
+})
+
+coursesRouter.delete('/:id', async (req, res) => {
+  const adminId = req.userId
+  const admin = await findAdmin(adminId)
+
+  if (!admin) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  if (req.userRole !== 'admin') {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  // First find all the choreographies associated with the course
+  const choreographies = await Choreography.findAll({ where: {
+    courseId: req.params.id
+  } })
+
+  // Delete all the videos associated with the choreographies
+  for (const choreography of choreographies) {
+    await Video.destroy({ where: { choreographyId: choreography.id } })
+  }
+
+  // Delete all the choreographies associated with the course
+  await Choreography.destroy({ where: { courseId: req.params.id } })
+
+  // Delete the course
+  const deleted = await Course.destroy({ where: { id: req.params.id } })
+
+  if (deleted) {
+    return res.status(204).end()
+  } else {
+    return res.status(404).json({ error: 'Course not found' })
+  }
 })
 
 module.exports = coursesRouter
